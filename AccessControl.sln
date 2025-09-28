@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masasamjant.AccessControl", "Masasamjant.AccessControl\Masasamjant.AccessControl.csproj", "{D2146C2F-AB47-430B-A2FD-0FCF40B18E26}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "demo", "demo", "{4A431521-C680-4960-8560-490D6DE89C21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masasamjant.AccessControl.Demo", "Masasamjant.AccessControl.Demo\Masasamjant.AccessControl.Demo.csproj", "{EE6AFE2F-871E-46CD-A490-29E20A896BBC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2146C2F-AB47-430B-A2FD-0FCF40B18E26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2146C2F-AB47-430B-A2FD-0FCF40B18E26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2146C2F-AB47-430B-A2FD-0FCF40B18E26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2146C2F-AB47-430B-A2FD-0FCF40B18E26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE6AFE2F-871E-46CD-A490-29E20A896BBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE6AFE2F-871E-46CD-A490-29E20A896BBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE6AFE2F-871E-46CD-A490-29E20A896BBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE6AFE2F-871E-46CD-A490-29E20A896BBC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D2146C2F-AB47-430B-A2FD-0FCF40B18E26} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{EE6AFE2F-871E-46CD-A490-29E20A896BBC} = {4A431521-C680-4960-8560-490D6DE89C21}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {53BE0653-A55D-4F35-A516-D0A479E6706D}
+	EndGlobalSection
+EndGlobal
