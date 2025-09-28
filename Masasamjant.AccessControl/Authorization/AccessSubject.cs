@@ -9,6 +9,14 @@ namespace Masasamjant.AccessControl.Authorization
 {
     public class AccessSubject
     {
+        public AccessSubject(IAccessControlPrincipal principal)
+        {
+            Identity = principal.GetAccessControlIdentity().Name;
+        }
+
+        public AccessSubject()
+        { }
+
         [JsonInclude]
         public string Identity { get; internal set; } = string.Empty;
     }

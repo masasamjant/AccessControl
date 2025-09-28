@@ -19,7 +19,7 @@ namespace Masasamjant.AccessControl.Demo.Services
         public User AddUser(string name, string password)
         {
             var userPassword = UserPassword.Create(name, password, hashProvider);
-            var user = new User(name, userPassword.PasswordHash); //Convert.ToBase64String(hashProvider.ComputeHash(Encoding.Unicode.GetBytes(name + password))));
+            var user = new User(name, userPassword.PasswordHash);
             users.Add(user);
             return user;
         }
