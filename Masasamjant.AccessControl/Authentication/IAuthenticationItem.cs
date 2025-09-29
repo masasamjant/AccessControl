@@ -16,6 +16,11 @@
         DateTimeOffset Created { get; }
 
         /// <summary>
+        /// Gets the name of authority associated with this item.
+        /// </summary>
+        string Authority { get; }
+
+        /// <summary>
         /// Gets if or not is valid.
         /// </summary>
         bool IsValid { get; }

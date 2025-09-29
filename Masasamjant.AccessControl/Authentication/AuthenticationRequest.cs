@@ -16,14 +16,12 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="principal">The <see cref="IAccessControlPrincipal"/> to authenticate.</param>
         /// <param name="authenticationScheme">The authentication scheme.</param>
         /// <exception cref="ArgumentNullException">If value of <paramref name="authenticationScheme"/> is empty or only whitespace.</exception>
-        public AuthenticationRequest(string identity, string authenticationScheme)
+        internal AuthenticationRequest(string identity, string authority, string authenticationScheme)
         {
-            if (string.IsNullOrWhiteSpace(authenticationScheme))
-                throw new ArgumentNullException(nameof(authenticationScheme), "The authentication scheme can not be empty or only whitespace.");
-
             Identifier = Guid.NewGuid();
             Identity = identity;
             Created = DateTimeOffset.UtcNow;
+            Authority = authority;
             AuthenticationScheme = authenticationScheme;
         }
 
@@ -51,6 +49,12 @@ namespace Masasamjant.AccessControl.Authentication
         /// </summary>
         [JsonInclude]
         public DateTimeOffset Created { get; internal set; }
+
+        /// <summary>
+        /// Gets the name of authority associated with this request.
+        /// </summary>
+        [JsonInclude]
+        public string Authority { get; internal set; } = string.Empty;
 
         /// <summary>
         /// Gets if or not request is valid.

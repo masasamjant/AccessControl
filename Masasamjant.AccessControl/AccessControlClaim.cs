@@ -15,6 +15,12 @@ namespace Masasamjant.AccessControl
             Value = value;
         }
 
+        internal AccessControlClaim(string key, string value, string authority)
+            : this(key, value)
+        { 
+            Authority = authority;
+        }
+
         public AccessControlClaim() 
         { }
 
@@ -23,5 +29,8 @@ namespace Masasamjant.AccessControl
 
         [JsonInclude]
         public string Value { get; internal set; } = string.Empty;
+
+        [JsonInclude]
+        public string Authority { get; internal set; } = string.Empty;
     }
 }

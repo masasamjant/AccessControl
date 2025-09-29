@@ -22,6 +22,7 @@ namespace Masasamjant.AccessControl.Authentication
 
             Identifier = request.Identifier;
             Created = DateTimeOffset.Now;
+            Authority = request.Authority;
             byte[] requestHash = request.CreateRequestHash(hashProvider);
             byte[] combine = ArrayHelper.Combine(requestHash, secret);
             Data = hashProvider.HashData(combine);
@@ -45,6 +46,12 @@ namespace Masasamjant.AccessControl.Authentication
         /// </summary>
         [JsonInclude]
         public DateTimeOffset Created { get; internal set; }
+
+        /// <summary>
+        /// Gets the name of authority associated with this challenge.
+        /// </summary>
+        [JsonInclude]
+        public string Authority { get; internal set; } = string.Empty;
 
         /// <summary>
         /// Gets if or not challenge is valid.

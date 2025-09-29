@@ -20,9 +20,15 @@ namespace Masasamjant.AccessControl.Authentication
         public DateTimeOffset Created { get; internal set; }
 
         /// <summary>
+        /// Gets the name of authority.
+        /// </summary>
+        [JsonInclude]
+        public string Authority { get; internal set; } = string.Empty;
+
+        /// <summary>
         /// Gets if or not is valid.
         /// </summary>
         [JsonIgnore]
-        public abstract bool IsValid { get; } 
+        public abstract bool IsValid { get; }
     }
 }

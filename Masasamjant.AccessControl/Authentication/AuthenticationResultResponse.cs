@@ -5,13 +5,15 @@ namespace Masasamjant.AccessControl.Authentication
     /// <summary>
     /// Represents authentication response.
     /// </summary>
-    public class AuthenticationResultResponse : IAuthenticationItem
+    public class AuthenticationResultResponse : AuthenticationResponse
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AuthenticationResultResponse"/> class.
         /// </summary>
         /// <param name="result">The <see cref="AuthenticationResult"/>.</param>
-        /// <param name="token">The <see cref="AuthenticationToken"/>.</param>
+        /// <param name="authenticationToken">The authentication token string.</param>
+        /// <param name="authority">The authority name.</param>
+        /// <param name="claims">The claims if authenticated.</param>
         /// <param name="unauthenticatedReason">The unauthenticated reason or <c>null</c>.</param>
         /// <exception cref="ArgumentException">
         /// If value of <paramref name="result"/> is not defined.
@@ -19,7 +21,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// If authenticate, but <paramref name="token"/> is not valid.
         /// </exception>
         /// <exception cref="ArgumentNullException">If authenticated, but <paramref name="token"/> is <c>null</c>.</exception>
-        internal AuthenticationResultResponse(AuthenticationResult result, AuthenticationToken? token, string? unauthenticatedReason)
+        internal AuthenticationResultResponse(AuthenticationResult result, string? authenticationToken, string authority, IEnumerable<AccessControlClaim> claims, string? unauthenticatedReason)
         {
             if (!Enum.IsDefined(result))
                 throw new ArgumentException("The value is not defined.", nameof(result));
@@ -27,25 +29,33 @@ namespace Masasamjant.AccessControl.Authentication
             if (result == AuthenticationResult.Unauthenticated)
             {
                 Result = result;
-                Token = new AuthenticationToken();
+                AuthenticationToken = string.Empty;
                 UnauthenticatedReason = unauthenticatedReason;
             }
             else
             {
-                if (token == null)
-                    throw new ArgumentNullException(nameof(token), "The authentication token is not set.");
-
-                if (!token.IsValid)
-                    throw new ArgumentException("The authentication token is not valid.", nameof(token));
+                if (string.IsNullOrWhiteSpace(authenticationToken))
+                    throw new ArgumentNullException(nameof(authenticationToken), "The authentication token is null, empty or only whitespace.");
 
                 Result = result;
-                Token = token;
+                AuthenticationToken = authenticationToken;
                 UnauthenticatedReason = null;
+                Claims = claims.ToArray();
             }
 
+            Authority = authority;
             Identifier = Guid.NewGuid();
             Created = DateTimeOffset.UtcNow;
         }
+
+        /// <summary>
+        /// Factory method create <see cref="AuthenticationResultResponse"/> of unauthentication.
+        /// </summary>
+        /// <param name="authority">The authority name.</param>
+        /// <param name="unauthenticatedReason">The unauthenticated reason.</param>
+        /// <returns>A <see cref="AuthenticationResultResponse"/> of unauthentication.</returns>
+        internal static AuthenticationResultResponse Unauthenticated(string authority, string? unauthenticatedReason)
+            => new AuthenticationResultResponse(AuthenticationResult.Unauthenticated, null, authority, [], unauthenticatedReason);
 
         /// <summary>
         /// Initializes new invalid instance of the <see cref="AuthenticationResultResponse"/> class.
@@ -53,12 +63,6 @@ namespace Masasamjant.AccessControl.Authentication
         /// <remarks>This is only for inheriting classes and serialization requirements.</remarks>
         public AuthenticationResultResponse()
         { }
-
-        /// <summary>
-        /// Gets the unique identifier of this response.
-        /// </summary>
-        [JsonInclude]
-        public Guid Identifier { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="AuthenticationResult"/>.
@@ -71,7 +75,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// </summary>
         /// <remarks>Is not valid when <see cref="Result"/> is <see cref="AuthenticationResult.Unauthenticated"/>.</remarks>
         [JsonInclude]
-        public AuthenticationToken Token { get; internal set; } = new AuthenticationToken();
+        public string AuthenticationToken { get; internal set; } = string.Empty;
 
         /// <summary>
         /// Gets the reason text for unauthentication, if used. <c>null</c> otherwise.
@@ -80,16 +84,16 @@ namespace Masasamjant.AccessControl.Authentication
         public string? UnauthenticatedReason { get; internal set; }
 
         /// <summary>
-        /// Gets the UTC date and time when response was created.
+        /// Gets the claims.
         /// </summary>
         [JsonInclude]
-        public DateTimeOffset Created { get; internal set; }
+        public AccessControlClaim[] Claims { get; internal set; } = [];
 
         /// <summary>
         /// Gets if or not this is valid response.
         /// </summary>
         [JsonIgnore]
-        public bool IsValid
+        public override bool IsValid
         {
             get { return !Identifier.IsEmpty(); }
         }

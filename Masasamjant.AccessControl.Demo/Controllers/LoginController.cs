@@ -1,5 +1,6 @@
 ﻿using Masasamjant.AccessControl.Authentication;
 using Masasamjant.AccessControl.Demo.Models;
+using Masasamjant.AccessControl.Demo.Services;
 using Masasamjant.Security.Abstractions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -10,12 +11,13 @@ namespace Masasamjant.AccessControl.Demo.Controllers
 {
     public class LoginController : Controller
     {
+        private AccessControlAuthority authority;
         private readonly Authenticator authenticator;
         private readonly IHashProvider hashProvider;
-        private const string AuthenticationScheme = "PASSWORD";
-
-        public LoginController(Authenticator authenticator, IHashProvider hashProvider)
+        
+        public LoginController(AccessControlAuthority authority, Authenticator authenticator, IHashProvider hashProvider)
         {
+            this.authority = authority;
             this.authenticator = authenticator;
             this.hashProvider = hashProvider;
         }
@@ -28,7 +30,7 @@ namespace Masasamjant.AccessControl.Demo.Controllers
         [HttpPost]
         public async Task<IActionResult> IndexAsync([FromForm] LoginViewModel model)
         {
-            var request = new AuthenticationRequest(model.UserName, AuthenticationScheme);
+            var request = authority.CreateAuthenticationRequest(model.UserName, DemoAuthority.AuthenticationScheme);
             var requestResponse = authenticator.RequestAuthentication(request);
 
             if (!requestResponse.IsValid)
@@ -36,19 +38,22 @@ namespace Masasamjant.AccessControl.Demo.Controllers
 
 
             var secretProvider = new ClientSecretProvider(model.UserName, model.Password, hashProvider);
-            var secret = secretProvider.GetAuthenticationSecret(model.UserName, AuthenticationScheme);
+            var secret = secretProvider.GetAuthenticationSecret(model.UserName, DemoAuthority.AuthenticationScheme);
             var challenge = requestResponse.CreateAuthenticationChallenge(secret, hashProvider);
             var response = authenticator.AuthenticateChallenge(challenge);
             
-            if (response.Result == AuthenticationResult.Authenticated && response.Token != null)
+            if (response.Result == AuthenticationResult.Authenticated && !string.IsNullOrWhiteSpace(response.AuthenticationToken))
             {
-                var claims = new List<System.Security.Claims.Claim>();
+                var claims = new List<Claim>();
 
-                foreach (var claim in response.Token.Claims)
+                foreach (var claim in response.Claims)
                 {
-                    var sysClaim = new System.Security.Claims.Claim(claim.Key, claim.Value);
+                    var sysClaim = new Claim(claim.Key, claim.Value, null, claim.Authority);
                     claims.Add(sysClaim);
                 }
+
+                claims.Add(new Claim("AuthenticationToken", response.AuthenticationToken, null, authority.Name));
+                claims.Add(new Claim("AuthenticationScheme", DemoAuthority.AuthenticationScheme, null, authority.Name));
 
                 var claimsIdentity = new ClaimsIdentity(
                     claims, CookieAuthenticationDefaults.AuthenticationScheme);

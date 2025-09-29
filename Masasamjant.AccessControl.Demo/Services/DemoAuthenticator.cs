@@ -8,8 +8,8 @@ namespace Masasamjant.AccessControl.Demo.Services
     {
         private static ConcurrentDictionary<Guid, AuthenticationRequest> requests = new ConcurrentDictionary<Guid, AuthenticationRequest>();
 
-        public DemoAuthenticator(IAccessControlPrincipalProvider identityProvider, IHashProvider hashProvider, IAuthenticationSecretProvider secretProvider) 
-            : base(identityProvider, hashProvider, secretProvider)
+        public DemoAuthenticator(AccessControlAuthority authority, IHashProvider hashProvider) 
+            : base(authority, hashProvider)
         { }
 
         protected override bool IsValidRequest(AuthenticationRequest request, out string? invalidReason)
@@ -27,7 +27,7 @@ namespace Masasamjant.AccessControl.Demo.Services
         protected override bool IsValidToken(AuthenticationToken token, out string? invalidReason)
         {
             invalidReason = null;
-            return token.Refreshed.HasValue ? HasValidCreationTime(token.Refreshed.Value) : HasValidCreationTime(token.Created);
+            return true;
         }
 
         private static bool HasValidCreationTime(DateTimeOffset value)

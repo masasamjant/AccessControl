@@ -11,6 +11,8 @@
         /// <param name="identity">The identity whose secret should be get.</param>
         /// <param name="authenticationScheme">The authentication scheme. The value depends on implementation.</param>
         /// <returns>A data of the secter or empty array if there is not such identity or if identity do not have secret in specified authentication scheme.</returns>
+        /// <exception cref="ArgumentNullException">If value of <paramref name="authenticationScheme"/> is empty or only whitespace.</exception>
+        /// <exception cref="NotSupportedException">If authentication scheme specified by <paramref name="authenticationScheme"/> is not supported.</exception>
         byte[] GetAuthenticationSecret(string identity, string authenticationScheme);
     }
 }

@@ -3,6 +3,7 @@ using Masasamjant.AccessControl.Demo.Models;
 using Masasamjant.Security.Abstractions;
 using System.Collections.Concurrent;
 using System.Text;
+using System.Text.Json;
 
 namespace Masasamjant.AccessControl.Demo.Services
 {
@@ -33,9 +34,6 @@ namespace Masasamjant.AccessControl.Demo.Services
 
         public byte[] GetAuthenticationSecret(string identity, string authenticationScheme)
         {
-            if (authenticationScheme.ToUpperInvariant() != "PASSWORD")
-                throw new NotSupportedException($"Authentication scheme '{authenticationScheme}' is not supported.");
-
             var user = GetUser(identity);
             return user != null ? Convert.FromBase64String(user.Password) : [];
         }
@@ -43,28 +41,6 @@ namespace Masasamjant.AccessControl.Demo.Services
         public IAccessControlPrincipal? GetAccessControlPrincipal(string name)
         {
             return GetUser(name);
-        }
-
-        public IAccessControlPrincipal? GetAccessControlPrincipal(AuthenticationToken authenticationToken)
-        {
-            return GetAuthenticateUser(authenticationToken.Value);
-        }
-
-        public string GetAuthenticationToken(IAccessControlPrincipal principal)
-        {
-            if (principal is User user)
-                return user.Identifier.ToString();
-            return string.Empty;
-        }
-
-        private User? GetAuthenticateUser(string authenticationToken)
-        {
-            if (Guid.TryParse(authenticationToken, out var result))
-            {
-                return users.Where(x => x.Identifier == result).FirstOrDefault();
-            }
-
-            return null;
         }
     }
 }

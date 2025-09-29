@@ -15,6 +15,7 @@ namespace Masasamjant.AccessControl.Authentication
         internal AuthenticationRequestResponse(AuthenticationRequest request)
         {
             Identifier = Guid.NewGuid();
+            Authority = request.Authority;
             Request = request;
             Created = DateTimeOffset.UtcNow;
         }

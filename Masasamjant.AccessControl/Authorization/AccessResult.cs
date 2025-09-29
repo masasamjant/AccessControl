@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Masasamjant.AccessControl.Authorization
+﻿namespace Masasamjant.AccessControl.Authorization
 {
     /// <summary>
     /// Represents result of the access decision.

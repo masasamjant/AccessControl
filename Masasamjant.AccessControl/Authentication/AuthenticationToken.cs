@@ -10,12 +10,13 @@ namespace Masasamjant.AccessControl.Authentication
         /// <summary>
         /// Initializes new instance of the <see cref="AuthenticationToken"/> class.
         /// </summary>
-        /// <param name="value">The value.</param>
+        /// <param name="identity">The identity value.</param>
+        /// <param name="authority">The authority name.</param>
         /// <param name="claims">The claims to associate with token.</param>
-        public AuthenticationToken(string value, IEnumerable<AccessControlClaim> claims)
+        internal AuthenticationToken(string identity, string authority, IEnumerable<AccessControlClaim> claims)
         {
             Identifier = Guid.NewGuid();
-            Value = value;
+            Identity = identity;
             Created = DateTimeOffset.UtcNow;
             Claims = claims.ToArray();
         }
@@ -37,7 +38,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// Gets the token value.
         /// </summary>
         [JsonInclude]
-        public string Value { get; internal set; } = string.Empty;
+        public string Identity { get; internal set; } = string.Empty;
 
         /// <summary>
         /// Gets the UTC date and time when token was created.
@@ -52,10 +53,10 @@ namespace Masasamjant.AccessControl.Authentication
         public AccessControlClaim[] Claims { get; internal set; } = [];
 
         /// <summary>
-        /// Gets the UTC date and time when token was refreshed.
+        /// Gets the name of authority associated with this token.
         /// </summary>
         [JsonInclude]
-        public DateTimeOffset? Refreshed { get; internal set; }
+        public string Authority { get; internal set; } = string.Empty;
 
         /// <summary>
         /// Gets if or not this is valid token.
@@ -63,19 +64,7 @@ namespace Masasamjant.AccessControl.Authentication
         [JsonIgnore]
         public bool IsValid
         {
-            get { return !Identifier.IsEmpty() && !string.IsNullOrWhiteSpace(Value); }
-        }
-
-        /// <summary>
-        /// Updates <see cref="Refreshed"/> value.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">If <see cref="IsValid"/> is <c>false</c>.</exception>
-        protected internal void Refresh()
-        {
-            if (!IsValid)
-                throw new InvalidOperationException("Authentication token is not valid.");
-
-            Refreshed = DateTimeOffset.UtcNow;
+            get { return !Identifier.IsEmpty() && !string.IsNullOrWhiteSpace(Identity); }
         }
     }
 }

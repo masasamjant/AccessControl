@@ -19,6 +19,7 @@ namespace Masasamjant.AccessControl.Demo
             builder.Services.AddSingleton<IHashProvider>(hashProvider);
             builder.Services.AddTransient<IAccessControlPrincipalProvider, UserService>();
             builder.Services.AddTransient<IAuthenticationSecretProvider, UserService>();
+            builder.Services.AddTransient<AccessControlAuthority, DemoAuthority>();
             builder.Services.AddTransient<Authenticator, DemoAuthenticator>();
 
             var service = new UserService(hashProvider);
