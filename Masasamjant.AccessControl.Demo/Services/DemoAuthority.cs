@@ -7,24 +7,19 @@ namespace Masasamjant.AccessControl.Demo.Services
     {
         internal const string AuthenticationScheme = "PASSWORD";
 
-        private readonly IAccessControlPrincipalProvider principalProvider;
         private readonly IAuthenticationSecretProvider secretProvider;
-
-        public DemoAuthority(IAccessControlPrincipalProvider principalProvider, IAuthenticationSecretProvider secretProvider)
+        private readonly IUserService userService;
+        public DemoAuthority(IUserService userService, IAuthenticationSecretProvider secretProvider)
             : base("Demo")
         {
-            this.principalProvider = principalProvider;
+            this.userService = userService;
             this.secretProvider = secretProvider;
         }
 
         protected override string[] AuthenticationSchemes => [AuthenticationScheme];
 
-        public override IAccessControlPrincipal? GetAccessControlPrincipal(string name)
-        {
-            return principalProvider.GetAccessControlPrincipal(name);
-        }
 
-        public override AuthenticationToken GetAuthenticationToken(string authenticationTokenString)
+        public override AuthenticationToken CreateAuthenticationToken(string authenticationTokenString)
         {
             if (string.IsNullOrWhiteSpace(authenticationTokenString))
                 return new AuthenticationToken();
@@ -34,7 +29,7 @@ namespace Masasamjant.AccessControl.Demo.Services
                 var authenticationToken = JsonSerializer.Deserialize<AuthenticationToken>(authenticationTokenString);
 
                 // No valid token or token not authorized by this authority > return invalid token.
-                if (authenticationToken == null || !IsAuthorized(authenticationToken))
+                if (authenticationToken == null || !IsAuthoring(authenticationToken))
                     return new AuthenticationToken();
 
                 return authenticationToken;
@@ -43,6 +38,12 @@ namespace Masasamjant.AccessControl.Demo.Services
             {
                 return new AuthenticationToken();
             }
+        }
+
+        public override bool IsAuthoring(AccessControlIdentity identity)
+        {
+            var user = userService.GetUser(identity.Name);
+            return user != null;
         }
 
         protected override string CreateAuthenticationToken(AuthenticationToken authenticationToken)

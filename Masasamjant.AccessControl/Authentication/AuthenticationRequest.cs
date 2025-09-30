@@ -16,7 +16,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="principal">The <see cref="IAccessControlPrincipal"/> to authenticate.</param>
         /// <param name="authenticationScheme">The authentication scheme.</param>
         /// <exception cref="ArgumentNullException">If value of <paramref name="authenticationScheme"/> is empty or only whitespace.</exception>
-        internal AuthenticationRequest(string identity, string authority, string authenticationScheme)
+        internal AuthenticationRequest(AccessControlIdentity identity, string authority, string authenticationScheme)
         {
             Identifier = Guid.NewGuid();
             Identity = identity;
@@ -41,8 +41,8 @@ namespace Masasamjant.AccessControl.Authentication
         /// <summary>
         /// Gets the user identity. This can be any unique value to identify user, like user name or email address or phone number etc., in application.
         /// </summary>
-        [JsonInclude]   
-        public string Identity { get; internal set; } = string.Empty;
+        [JsonInclude]
+        public AccessControlIdentity Identity { get; internal set; } = new AccessControlIdentity();
 
         /// <summary>
         /// Gets the UTC time when request was created.
@@ -62,7 +62,7 @@ namespace Masasamjant.AccessControl.Authentication
         [JsonIgnore]
         public bool IsValid
         {
-            get { return !Identifier.IsEmpty() && !string.IsNullOrWhiteSpace(Identity); }
+            get { return !Identifier.IsEmpty() && Identity.IsValid; }
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Masasamjant.AccessControl.Authentication
             if (!IsValid)
                 return [];
 
-            var value = string.Concat(Identifier, Identity, Created.ToString(CultureInfo.InvariantCulture));
+            var value = string.Concat(Identifier, Identity.Name, Created.ToString(CultureInfo.InvariantCulture), Authority, AuthenticationScheme);
             var data = Encoding.Unicode.GetBytes(value);
             return hashProvider.HashData(data);
         }

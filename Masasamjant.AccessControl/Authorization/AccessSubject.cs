@@ -10,10 +10,16 @@ namespace Masasamjant.AccessControl.Authorization
         /// <summary>
         /// Initializes new instance of the <see cref="AccessSubject"/> class.
         /// </summary>
-        /// <param name="principal">The <see cref="IAccessControlPrincipal"/>.</param>
-        public AccessSubject(IAccessControlPrincipal principal)
+        /// <param name="principal">The <see cref="AccessControlPrincipal"/>.</param>
+        public AccessSubject(AccessControlPrincipal principal)
         {
-            Identity = principal.GetAccessControlIdentity().Name;
+            if (!principal.Identity.IsValid)
+                throw new ArgumentException("The identity of principal is not valid.", nameof(principal));
+
+            if (!principal.Identity.IsAuthenticated)
+                throw new ArgumentException("The identity of principal is not authenticated.", nameof(principal));
+
+            Identity = principal.Identity;
         }
 
         /// <summary>
@@ -27,7 +33,7 @@ namespace Masasamjant.AccessControl.Authorization
         /// Gets the identity of principal.
         /// </summary>
         [JsonInclude]
-        public string Identity { get; internal set; } = string.Empty;
+        public AccessControlIdentity Identity { get; internal set; } = new AccessControlIdentity();
 
         /// <summary>
         /// Gets if or not this represents valid access subject.
@@ -35,7 +41,7 @@ namespace Masasamjant.AccessControl.Authorization
         [JsonIgnore]
         public bool IsValid
         {
-            get { return !string.IsNullOrWhiteSpace(Identity); }
+            get { return Identity.IsValid; }
         }
     }
 }

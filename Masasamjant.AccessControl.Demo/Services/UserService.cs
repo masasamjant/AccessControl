@@ -7,7 +7,12 @@ using System.Text.Json;
 
 namespace Masasamjant.AccessControl.Demo.Services
 {
-    public class UserService : IAccessControlPrincipalProvider, IAuthenticationSecretProvider
+    public interface IUserService
+    {
+        User? GetUser(string name);
+    }
+
+    public class UserService : IUserService, IAuthenticationSecretProvider
     {
         private IHashProvider hashProvider;
         private static ConcurrentBag<User> users = new ConcurrentBag<User>();
@@ -36,11 +41,6 @@ namespace Masasamjant.AccessControl.Demo.Services
         {
             var user = GetUser(identity);
             return user != null ? Convert.FromBase64String(user.Password) : [];
-        }
-
-        public IAccessControlPrincipal? GetAccessControlPrincipal(string name)
-        {
-            return GetUser(name);
         }
     }
 }

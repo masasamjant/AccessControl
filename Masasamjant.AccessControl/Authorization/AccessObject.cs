@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl.Authorization
     /// <summary>
     /// Represents accessed object.
     /// </summary>
-    public class AccessObject
+    public class AccessObject : IEquatable<AccessObject>
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AccessObject"/> class.
@@ -55,6 +55,35 @@ namespace Masasamjant.AccessControl.Authorization
         public bool IsValid
         {
             get { return !string.IsNullOrWhiteSpace(Application) && !string.IsNullOrWhiteSpace(Name); }
+        }
+
+        public bool Equals(AccessObject? other)
+        {
+            if (other != null)
+            {
+                if (IsValid)
+                {
+                    return string.Equals(Application, other.Application, StringComparison.Ordinal) &&
+                        string.Equals(Name, other.Name, StringComparison.Ordinal);
+                }
+
+                return IsValid == other.IsValid;
+            }
+
+            return false;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as AccessObject);
+        }
+
+        public override int GetHashCode()
+        {
+            if (!IsValid)
+                return 0;
+
+            return HashCode.Combine(Application, Name);
         }
     }
 }

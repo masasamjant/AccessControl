@@ -13,12 +13,19 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="identity">The identity value.</param>
         /// <param name="authority">The authority name.</param>
         /// <param name="claims">The claims to associate with token.</param>
-        internal AuthenticationToken(string identity, string authority, IEnumerable<AccessControlClaim> claims)
+        internal AuthenticationToken(AccessControlIdentity identity, string authority, IEnumerable<AccessControlClaim> claims, IEnumerable<string> roles)
         {
+            if (!identity.IsValid)
+                throw new ArgumentException("The identity is not valid.", nameof(identity));
+
+            if (!identity.IsAuthenticated)
+                throw new ArgumentException("The identity does not represents authenticated identity.", nameof(identity));
+
             Identifier = Guid.NewGuid();
             Identity = identity;
             Created = DateTimeOffset.UtcNow;
             Claims = claims.ToArray();
+            Roles = roles.ToArray();
         }
 
         /// <summary>
@@ -38,7 +45,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// Gets the token value.
         /// </summary>
         [JsonInclude]
-        public string Identity { get; internal set; } = string.Empty;
+        public AccessControlIdentity Identity { get; internal set; } = new AccessControlIdentity();
 
         /// <summary>
         /// Gets the UTC date and time when token was created.
@@ -53,6 +60,12 @@ namespace Masasamjant.AccessControl.Authentication
         public AccessControlClaim[] Claims { get; internal set; } = [];
 
         /// <summary>
+        /// Gets the roles associated with principal.
+        /// </summary>
+        [JsonInclude]
+        public string[] Roles { get; internal set; } = [];
+
+        /// <summary>
         /// Gets the name of authority associated with this token.
         /// </summary>
         [JsonInclude]
@@ -64,7 +77,7 @@ namespace Masasamjant.AccessControl.Authentication
         [JsonIgnore]
         public bool IsValid
         {
-            get { return !Identifier.IsEmpty() && !string.IsNullOrWhiteSpace(Identity); }
+            get { return !Identifier.IsEmpty() && Identity.IsValid; }
         }
     }
 }

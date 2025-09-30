@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 
 namespace Masasamjant.AccessControl.Authorization
 {
-    public class AccessControlList
+    public abstract class AccessControlList
     {
-        public AccessControlList()
-        {
-        }
+        public abstract AccessResult? GetAccessResult(AccessRequest accessRequest);
+
+        public abstract void SetAccessResult(AccessDecision accessDecision);
+
+        public abstract void Clear();
     }
 }

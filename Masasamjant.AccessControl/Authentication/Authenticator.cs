@@ -45,7 +45,7 @@ namespace Masasamjant.AccessControl.Authentication
                 throw new AuthenticationException("Authentication request is not valid.", request);
 
             // Check that request is authorized.
-            if (!Authority.IsAuthorized(request))
+            if (!Authority.IsAuthoring(request))
                 throw new AuthenticationException($"Authentication request is not authorized by '{Authority.Name}' authority.", request);
 
             try
@@ -54,11 +54,8 @@ namespace Masasamjant.AccessControl.Authentication
                 if (!IsValidRequest(request, out var reason))
                     throw new AuthenticationException(string.IsNullOrWhiteSpace(reason) ? "Authentication request is not valid" : reason, request);
 
-                // Get principal with specified identity.
-                var principal = Authority.GetAccessControlPrincipal(request.Identity);
-
-                // If principal not exist, then return invalid response.
-                if (principal == null)
+                // Check if authority is authoring specified identity.
+                if (!Authority.IsAuthoring(request.Identity))
                     return new AuthenticationRequestResponse();
 
                 // Create valid response.
@@ -96,7 +93,7 @@ namespace Masasamjant.AccessControl.Authentication
                 throw new AuthenticationException("Authentication challenge is not valid.", challenge);
 
             // Check that challenge is authorized.
-            if (!Authority.IsAuthorized(challenge))
+            if (!Authority.IsAuthoring(challenge))
                 throw new AuthenticationException($"Authentication challenge is not authorized by '{Authority.Name}' authority.", challenge);
 
             // Check data challenge contains data.
@@ -113,18 +110,11 @@ namespace Masasamjant.AccessControl.Authentication
                 var request = GetAuthenticationRequest(challenge.Identifier);
 
                 // No such request, return unauthenticated response.
-                if (request == null)
-                    return AuthenticationResultResponse.Unauthenticated(Authority.Name, null);
-
-                // Get principal by identity.
-                var principal = Authority.GetAccessControlPrincipal(request.Identity);
-
-                // If principal not exist, return unauthenticated response.
-                if (principal == null)
-                    return AuthenticationResultResponse.Unauthenticated(Authority.Name, $"Principal with identity of '{request.Identity}' not found.");
+                if (request == null || string.IsNullOrWhiteSpace(request.Identity.Name))
+                    return new AuthenticationResultResponse(null, Authority.Name);
 
                 // Gets the authentication secret.
-                var secret = Authority.GetAuthenticationSecret(request.Identity, request.AuthenticationScheme);
+                var secret = Authority.GetAuthenticationSecret(request.Identity.Name, request.AuthenticationScheme);
 
                 // Gets the challange from saved request.
                 var requestChallenge = request.CreateAuthenticationChallenge(secret, HashProvider);
@@ -137,16 +127,27 @@ namespace Masasamjant.AccessControl.Authentication
                     {
                         // If mismatch, return unauthenticated response.
                         if (challenge.Data[index] != requestChallenge.Data[index])
-                            return AuthenticationResultResponse.Unauthenticated(Authority.Name, null);
+                            return new AuthenticationResultResponse(null, Authority.Name);
                     }
 
+                    var identity = request.Identity;
+                    identity.IsAuthenticated = true;
+                    identity.AuthenticationType = request.AuthenticationScheme;
+                    var principal = new AccessControlPrincipal(request.Identity);
+                    var claims = Authority.GetPrincipalClaims(principal);
+                    var roles = Authority.GetPrincipalRoles(principal);
+                    principal.Claims = claims.ToArray();
+                    principal.Roles = roles.ToArray();
+
                     // Data matches, get authentication token string and create authenticated response.
-                    var authenticationToken = Authority.GetAuthenticationToken(principal);
-                    return new AuthenticationResultResponse(AuthenticationResult.Authenticated, authenticationToken, Authority.Name, principal.GetClaims(), null);
+                    var authenticationToken = Authority.CreateAuthenticationToken(principal);
+                    identity.AuthenticationToken = authenticationToken;
+
+                    return new AuthenticationResultResponse(principal, Authority.Name);
                 }
 
                 // Challenges not with same data return unauthenticated response.
-                return AuthenticationResultResponse.Unauthenticated(Authority.Name, null);
+                return new AuthenticationResultResponse(null, Authority.Name);
             }
             catch (Exception exception)
             {
@@ -169,7 +170,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// </exception>
         public AuthenticationResultResponse AuthenticateToken(string authenticationToken)
         {
-            var token = Authority.GetAuthenticationToken(authenticationToken);
+            var token = Authority.CreateAuthenticationToken(authenticationToken);
             
             if (!token.IsValid)
                 throw new AuthenticationException("Authentication token is not valid.", token);
@@ -179,14 +180,22 @@ namespace Masasamjant.AccessControl.Authentication
                 if (!IsValidToken(token, out var reason))
                     throw new AuthenticationException(string.IsNullOrWhiteSpace(reason) ? "Authentication token is not valid." : reason, token);
 
-                var principal = Authority.GetAccessControlPrincipal(token.Identity);
+                if (!token.Identity.IsAuthenticated)
+                    return new AuthenticationResultResponse(null, Authority.Name);
 
-                if (principal == null)
-                    return AuthenticationResultResponse.Unauthenticated(Authority.Name, null);
+                if (!Authority.IsAuthoring(token.Identity))
+                    return new AuthenticationResultResponse(null, Authority.Name);
 
-                authenticationToken = Authority.GetAuthenticationToken(principal);
+                var principal = new AccessControlPrincipal(token.Identity);
+                var claims = Authority.GetPrincipalClaims(principal);
+                var roles = Authority.GetPrincipalRoles(principal);
+                principal.Claims = claims.ToArray();
+                principal.Roles = roles.ToArray();
+
+                authenticationToken = Authority.CreateAuthenticationToken(principal);
+                principal.Identity.AuthenticationToken = authenticationToken;
                 
-                return new AuthenticationResultResponse(AuthenticationResult.Authenticated, authenticationToken, Authority.Name, principal.GetClaims(), null);
+                return new AuthenticationResultResponse(principal, Authority.Name);
             }
             catch (Exception exception)
             {

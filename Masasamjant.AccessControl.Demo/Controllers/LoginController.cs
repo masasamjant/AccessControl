@@ -30,7 +30,8 @@ namespace Masasamjant.AccessControl.Demo.Controllers
         [HttpPost]
         public async Task<IActionResult> IndexAsync([FromForm] LoginViewModel model)
         {
-            var request = authority.CreateAuthenticationRequest(model.UserName, DemoAuthority.AuthenticationScheme);
+            var identity = new AccessControlIdentity(model.UserName);
+            var request = authority.CreateAuthenticationRequest(identity, DemoAuthority.AuthenticationScheme);
             var requestResponse = authenticator.RequestAuthentication(request);
 
             if (!requestResponse.IsValid)
@@ -41,18 +42,19 @@ namespace Masasamjant.AccessControl.Demo.Controllers
             var secret = secretProvider.GetAuthenticationSecret(model.UserName, DemoAuthority.AuthenticationScheme);
             var challenge = requestResponse.CreateAuthenticationChallenge(secret, hashProvider);
             var response = authenticator.AuthenticateChallenge(challenge);
-            
-            if (response.Result == AuthenticationResult.Authenticated && !string.IsNullOrWhiteSpace(response.AuthenticationToken))
+            var principal = response.Principal;
+
+            if (response.Result == AuthenticationResult.Authenticated && principal != null && !string.IsNullOrWhiteSpace(principal.AuthenticationToken))
             {
                 var claims = new List<Claim>();
 
-                foreach (var claim in response.Claims)
+                foreach (var claim in principal.Claims)
                 {
                     var sysClaim = new Claim(claim.Key, claim.Value, null, claim.Authority);
                     claims.Add(sysClaim);
                 }
 
-                claims.Add(new Claim("AuthenticationToken", response.AuthenticationToken, null, authority.Name));
+                claims.Add(new Claim("AuthenticationToken", principal.AuthenticationToken, null, authority.Name));
                 claims.Add(new Claim("AuthenticationScheme", DemoAuthority.AuthenticationScheme, null, authority.Name));
 
                 var claimsIdentity = new ClaimsIdentity(
