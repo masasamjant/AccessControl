@@ -11,11 +11,11 @@ namespace Masasamjant.AccessControl.Demo.Controllers
 {
     public class LoginController : Controller
     {
-        private AccessControlAuthority authority;
-        private readonly Authenticator authenticator;
+        private IAccessControlAuthority authority;
+        private readonly IAuthenticationChallengeAuthenticator authenticator;
         private readonly IHashProvider hashProvider;
         
-        public LoginController(AccessControlAuthority authority, Authenticator authenticator, IHashProvider hashProvider)
+        public LoginController(IAccessControlAuthority authority, IAuthenticationChallengeAuthenticator authenticator, IHashProvider hashProvider)
         {
             this.authority = authority;
             this.authenticator = authenticator;
@@ -37,10 +37,9 @@ namespace Masasamjant.AccessControl.Demo.Controllers
             if (!requestResponse.IsValid)
                 return RedirectToAction(nameof(Index));
 
-
             var secretProvider = new ClientSecretProvider(model.UserName, model.Password, hashProvider);
             var secret = secretProvider.GetAuthenticationSecret(model.UserName, DemoAuthority.AuthenticationScheme);
-            var challenge = requestResponse.CreateAuthenticationChallenge(secret, hashProvider);
+            var challenge = requestResponse.Request.CreateAuthenticationChallenge(secret, hashProvider);
             var response = authenticator.AuthenticateChallenge(challenge);
             var principal = response.Principal;
 

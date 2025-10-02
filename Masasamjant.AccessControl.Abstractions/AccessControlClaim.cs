@@ -15,10 +15,10 @@ namespace Masasamjant.AccessControl
             Value = value;
         }
 
-        internal AccessControlClaim(string key, string value, string authority)
+        public AccessControlClaim(string key, string value, IAccessControlAuthority authority)
             : this(key, value)
-        { 
-            Authority = authority;
+        {
+            Authority = authority.Name;
         }
 
         public AccessControlClaim() 

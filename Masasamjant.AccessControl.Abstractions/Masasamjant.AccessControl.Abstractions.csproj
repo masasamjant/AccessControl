@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <AssemblyName>Masasamjant.AccessControl</AssemblyName>
+    <AssemblyName>Masasamjant.AccessControl.Abstractions</AssemblyName>
     <RootNamespace>Masasamjant.AccessControl</RootNamespace>
     <Title>Access Control Library</Title>
     <Authors>Matti Jantti</Authors>
@@ -19,13 +19,13 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <IncludeSymbols>True</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>    
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Masasamjant.Framework" Version="1.4.2" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <None Update="LICENSE.txt">
       <Pack>True</Pack>
@@ -36,13 +36,5 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Authorization\Roles\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Masasamjant.AccessControl.Abstractions\Masasamjant.AccessControl.Abstractions.csproj" />
-  </ItemGroup>
-
+  
 </Project>

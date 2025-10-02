@@ -5,21 +5,21 @@ namespace Masasamjant.AccessControl
     /// <summary>
     /// Represents abstract access control authority.
     /// </summary>
-    public abstract class AccessControlAuthority : IAuthenticationSecretProvider, IAuthenticationTokenFactory, IPrincipalClaimProvider, IPrincipalRoleProvider
+    public abstract class AccessControlAuthority : IAccessControlAuthority, IAuthenticationSecretProvider, IAuthenticationTokenFactory, IPrincipalClaimProvider, IPrincipalRoleProvider
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AccessControlAuthority"/> class.
         /// </summary>
         /// <param name="name">The authority name.</param>
-        /// <param name="principalProvider">The <see cref="IAccessControlPrincipalProvider"/>.</param>
-        /// <param name="secretProvider">The <see cref="IAuthenticationSecretProvider"/>.</param>
+        /// <param name="itemValidator">The custom authentication item validator.</param>
         /// <exception cref="ArgumentNullException">If value of <paramref name="name"/> is empty or only whitespace.</exception>
-        protected AccessControlAuthority(string name)
+        protected AccessControlAuthority(string name, IAuthenticationItemValidator itemValidator)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name), "The authority name is empty or only whitespace.");
 
             Name = name;
+            ItemValidator = itemValidator;
         }
 
         /// <summary>
@@ -34,6 +34,11 @@ namespace Masasamjant.AccessControl
         protected abstract string[] AuthenticationSchemes { get; }
 
         /// <summary>
+        /// Gets the <see cref="IAuthenticationItemValidator"/>.
+        /// </summary>
+        protected IAuthenticationItemValidator ItemValidator { get; }
+
+        /// <summary>
         /// Creates new authentication request authorized by this authority.
         /// </summary>
         /// <param name="identity">The identity of the principal.</param>
@@ -43,13 +48,20 @@ namespace Masasamjant.AccessControl
         /// <exception cref="NotSupportedException">If authentication scheme specified by <paramref name="authenticationScheme"/> is not supported.</exception>
         public AuthenticationRequest CreateAuthenticationRequest(AccessControlIdentity identity, string authenticationScheme)
         {
-            if (string.IsNullOrWhiteSpace(authenticationScheme))
-                throw new ArgumentNullException(nameof(authenticationScheme), "The authentication scheme is empty or only whitespace.");
+            CheckAuthenticationScheme(authenticationScheme);
 
-            if (AuthenticationSchemes.Length > 0 && !AuthenticationSchemes.Contains(authenticationScheme))
-                throw new NotSupportedException($"Authentication scheme '{authenticationScheme}' is not supported by '{Name}' authority.");
+            return new AuthenticationRequest(identity, this, authenticationScheme);
+        }
 
-            return new AuthenticationRequest(identity, Name, authenticationScheme);
+        /// <summary>
+        /// Check if this authority supports specified authentication scheme.
+        /// </summary>
+        /// <param name="authenticationScheme">The authentication scheme.</param>
+        /// <returns><c>true</c> if specified authentication scheme is supported; <c>false</c> otherwise.</returns>
+        public bool IsSupportedAuthentication(string authenticationScheme)
+        {
+            // If empty, then should support all schemes. Otherwise check if contains specified scheme.
+            return AuthenticationSchemes.Length == 0 || AuthenticationSchemes.Contains(authenticationScheme);
         }
 
         /// <summary>
@@ -57,8 +69,10 @@ namespace Masasamjant.AccessControl
         /// </summary>
         /// <param name="principal">The <see cref="AccessControlPrincipal"/>.</param>
         /// <returns>A authentication token string.</returns>
-        public string CreateAuthenticationToken(AccessControlPrincipal principal)
+        public string CreateAuthenticationToken(AccessControlPrincipal principal, string authenticationScheme)
         {
+            CheckAuthenticationScheme(authenticationScheme);
+
             var identity = principal.Identity;
 
             if (!identity.IsValid || !identity.IsAuthenticated)
@@ -67,9 +81,9 @@ namespace Masasamjant.AccessControl
             var claims = new List<AccessControlClaim>();
             
             foreach (var claim in principal.Claims)
-                claims.Add(new AccessControlClaim(claim.Key, claim.Value, Name));
+                claims.Add(new AccessControlClaim(claim.Key, claim.Value, this));
             
-            var authenticationToken = new AuthenticationToken(identity, Name, claims, principal.Roles);
+            var authenticationToken = new AuthenticationToken(identity, this, authenticationScheme, claims, principal.Roles);
 
             return CreateAuthenticationToken(authenticationToken);
         }
@@ -115,14 +129,17 @@ namespace Masasamjant.AccessControl
         /// <exception cref="NotSupportedException">If authentication scheme specified by <paramref name="authenticationScheme"/> is not supported.</exception>
         public byte[] GetAuthenticationSecret(string identity, string authenticationScheme)
         {
-            if (string.IsNullOrWhiteSpace(authenticationScheme))
-                throw new ArgumentNullException(nameof(authenticationScheme), "The authentication scheme is empty or only whitespace.");
-
-            if (AuthenticationSchemes.Length > 0 && !AuthenticationSchemes.Contains(authenticationScheme))
-                throw new NotSupportedException($"Authentication scheme '{authenticationScheme}' is not supported by '{Name}' authority.");
+            CheckAuthenticationScheme(authenticationScheme);
 
             return GetIdentityAuthenticationSecret(identity, authenticationScheme);
         }
+
+        /// <summary>
+        /// Gets the <see cref="AccessControlIdentity"/> that represents authenticated identity.
+        /// </summary>
+        /// <param name="identity">The <see cref="AccessControlIdentity"/> that represents unauthenticated identity.</param>
+        /// <returns>A <see cref="AccessControlIdentity"/> that represents authenticated identity.</returns>
+        public abstract AccessControlIdentity GetAuthenticatedIdentity(AccessControlIdentity identity);
 
         /// <summary>
         /// Gets the secret of the specified identity for the specified authentication scheme.
@@ -136,5 +153,20 @@ namespace Masasamjant.AccessControl
         public virtual IEnumerable<AccessControlClaim> GetPrincipalClaims(AccessControlPrincipal principal) => [];
 
         public virtual IEnumerable<string> GetPrincipalRoles(AccessControlPrincipal principal) => [];
+
+        /// <summary>
+        /// Validates that value of <paramref name="authenticationScheme"/> is not empty or only whitespace and that it is supported. 
+        /// </summary>
+        /// <param name="authenticationScheme">The authentication scheme.</param>
+        /// <exception cref="ArgumentNullException">If value of <paramref name="authenticationScheme"/> is empty or only whitespace.</exception>
+        /// <exception cref="NotSupportedException">If value of <paramref name="authenticationScheme"/> is not supported.</exception>
+        protected void CheckAuthenticationScheme(string authenticationScheme)
+        {
+            if (string.IsNullOrWhiteSpace(authenticationScheme))
+                throw new ArgumentNullException(nameof(authenticationScheme), "The authentication scheme is empty or only whitespace.");
+
+            if (!IsSupportedAuthentication(authenticationScheme))
+                throw new NotSupportedException($"Authentication scheme '{authenticationScheme}' is not supported by '{Name}' authority.");
+        }
     }
 }

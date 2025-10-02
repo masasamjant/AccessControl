@@ -5,9 +5,9 @@ namespace Masasamjant.AccessControl.Authentication
     /// <summary>
     /// Represents authentication response.
     /// </summary>
-    public class AuthenticationResultResponse : AuthenticationResponse
+    public sealed class AuthenticationResultResponse : AuthenticationResponse
     {
-        internal AuthenticationResultResponse(AccessControlPrincipal? principal, string authority)
+        public AuthenticationResultResponse(AccessControlPrincipal? principal, string authority)
         {
             Principal = principal;
             Authority = authority;

@@ -19,7 +19,11 @@ namespace Masasamjant.AccessControl.Authorization
             if (!principal.Identity.IsAuthenticated)
                 throw new ArgumentException("The identity of principal is not authenticated.", nameof(principal));
 
+            if (string.IsNullOrWhiteSpace(principal.AuthenticationToken))
+                throw new ArgumentException("The principal has invalid authentication token.", nameof(principal));
+
             Identity = principal.Identity;
+            AuthenticationToken = principal.AuthenticationToken;
         }
 
         /// <summary>
@@ -36,12 +40,18 @@ namespace Masasamjant.AccessControl.Authorization
         public AccessControlIdentity Identity { get; internal set; } = new AccessControlIdentity();
 
         /// <summary>
+        /// Gets the authentication token.
+        /// </summary>
+        [JsonInclude]
+        public string AuthenticationToken { get; internal set; } = string.Empty;
+
+        /// <summary>
         /// Gets if or not this represents valid access subject.
         /// </summary>
         [JsonIgnore]
         public bool IsValid
         {
-            get { return Identity.IsValid; }
+            get { return Identity.IsValid && !string.IsNullOrWhiteSpace(AuthenticationToken); }
         }
     }
 }

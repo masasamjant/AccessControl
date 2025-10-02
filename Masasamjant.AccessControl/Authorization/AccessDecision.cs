@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl.Authorization
     /// <summary>
     /// Represents access decision.
     /// </summary>
-    public class AccessDecision
+    public sealed class AccessDecision
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AccessDecision"/> class.
@@ -17,7 +17,7 @@ namespace Masasamjant.AccessControl.Authorization
         /// -or-
         /// If value of <paramref name="result"/> is not defined.
         /// </exception>
-        public AccessDecision(AccessRequest request, AccessResult result)
+        private AccessDecision(AccessRequest request, AccessResult result)
         {
             if (!request.IsValid)
                 throw new ArgumentException("The access request is not valid.", nameof(request));
@@ -56,5 +56,11 @@ namespace Masasamjant.AccessControl.Authorization
         {
             get { return Request.IsValid && Enum.IsDefined(Result); }
         }
+
+        internal static AccessDecision Denied(AccessRequest request)
+            => new AccessDecision(request, AccessResult.Deny);
+
+        internal static AccessDecision Granted(AccessRequest request)
+            => new AccessDecision(request, AccessResult.Grant);
     }
 }

@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "demo", "demo", "{4A431521-C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masasamjant.AccessControl.Demo", "Masasamjant.AccessControl.Demo\Masasamjant.AccessControl.Demo.csproj", "{EE6AFE2F-871E-46CD-A490-29E20A896BBC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masasamjant.AccessControl.Abstractions", "Masasamjant.AccessControl.Abstractions\Masasamjant.AccessControl.Abstractions.csproj", "{2D182EAD-3E6A-4E3C-81EE-1D62F5E66E57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{EE6AFE2F-871E-46CD-A490-29E20A896BBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE6AFE2F-871E-46CD-A490-29E20A896BBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE6AFE2F-871E-46CD-A490-29E20A896BBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D182EAD-3E6A-4E3C-81EE-1D62F5E66E57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D182EAD-3E6A-4E3C-81EE-1D62F5E66E57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D182EAD-3E6A-4E3C-81EE-1D62F5E66E57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D182EAD-3E6A-4E3C-81EE-1D62F5E66E57}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D2146C2F-AB47-430B-A2FD-0FCF40B18E26} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{EE6AFE2F-871E-46CD-A490-29E20A896BBC} = {4A431521-C680-4960-8560-490D6DE89C21}
+		{2D182EAD-3E6A-4E3C-81EE-1D62F5E66E57} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {53BE0653-A55D-4F35-A516-D0A479E6706D}

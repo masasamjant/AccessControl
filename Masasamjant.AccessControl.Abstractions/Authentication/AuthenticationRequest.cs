@@ -8,20 +8,20 @@ namespace Masasamjant.AccessControl.Authentication
     /// <summary>
     /// Represents request to authenticate identity.
     /// </summary>
-    public class AuthenticationRequest : IAuthenticationItem
+    public sealed class AuthenticationRequest : IAuthenticationItem
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AuthenticationRequest"/> class.
         /// </summary>
-        /// <param name="principal">The <see cref="IAccessControlPrincipal"/> to authenticate.</param>
+        /// <param name="authority">The <see cref="IAccessControlAuthority"/>.</param>
         /// <param name="authenticationScheme">The authentication scheme.</param>
         /// <exception cref="ArgumentNullException">If value of <paramref name="authenticationScheme"/> is empty or only whitespace.</exception>
-        internal AuthenticationRequest(AccessControlIdentity identity, string authority, string authenticationScheme)
+        public AuthenticationRequest(AccessControlIdentity identity, IAccessControlAuthority authority, string authenticationScheme)
         {
             Identifier = Guid.NewGuid();
             Identity = identity;
             Created = DateTimeOffset.UtcNow;
-            Authority = authority;
+            Authority = authority.Name;
             AuthenticationScheme = authenticationScheme;
         }
 
@@ -77,7 +77,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="hashProvider">The <see cref="IHashProvider"/>.</param>
         /// <returns>A hash string.</returns>
         /// <remarks>If <see cref="IsValid"/> is <c>false</c>, then returns empty string.</remarks>
-        internal byte[] CreateRequestHash(IHashProvider hashProvider)
+        public byte[] CreateRequestHash(IHashProvider hashProvider)
         {
             if (!IsValid)
                 return [];
@@ -94,10 +94,10 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="hashProvider">The <see cref="IHashProvider"/>.</param>
         /// <returns>A <see cref="AuthenticationChallenge"/>.</returns>
         /// <exception cref="InvalidOperationException">If this request is not valid.</exception>
-        internal AuthenticationChallenge CreateAuthenticationChallenge(byte[] secret, IHashProvider hashProvider)
+        public AuthenticationChallenge CreateAuthenticationChallenge(byte[] secret, IHashProvider hashProvider)
         {
             if (!IsValid)
-                throw new InvalidOperationException("Authentication response is not valid.");
+                throw new InvalidOperationException("Authentication request is not valid.");
 
             return new AuthenticationChallenge(this, secret, hashProvider);
         }

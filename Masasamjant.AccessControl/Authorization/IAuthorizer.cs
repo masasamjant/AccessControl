@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace Masasamjant.AccessControl.Authorization
 {
-    public interface IAuthorization
+    public interface IAuthorizer
     {
-        AccessDecision Authorize(AccessRequest request);
+        AccessDecision Authorize(AccessRequest accessRequest);
+
+        Task<AccessDecision> AuthorizeAsync(AccessRequest accessRequest);
     }
 }

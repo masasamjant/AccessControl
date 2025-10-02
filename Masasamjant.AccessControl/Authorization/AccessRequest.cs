@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl.Authorization
     /// <summary>
     /// Represent request of access.
     /// </summary>
-    public class AccessRequest
+    public sealed class AccessRequest
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AccessRequest"/> class.

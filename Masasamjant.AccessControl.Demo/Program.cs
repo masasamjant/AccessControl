@@ -19,8 +19,10 @@ namespace Masasamjant.AccessControl.Demo
             builder.Services.AddSingleton<IHashProvider>(hashProvider);
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IAuthenticationSecretProvider, UserService>();
-            builder.Services.AddTransient<AccessControlAuthority, DemoAuthority>();
-            builder.Services.AddTransient<Authenticator, DemoAuthenticator>();
+            builder.Services.AddSingleton<IAuthenticationItemValidator, DemoAuthenticationItemValidator>();
+            builder.Services.AddSingleton<IAuthenticationRequestRepository, AuthenticationRequestRepository>();
+            builder.Services.AddTransient<IAccessControlAuthority, DemoAuthority>();
+            builder.Services.AddTransient<IAuthenticationChallengeAuthenticator, AuthenticationChallengeAuthenticator>();
 
             var service = new UserService(hashProvider);
             service.AddUser("admin", "Good4Life!");

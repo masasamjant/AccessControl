@@ -9,8 +9,8 @@ namespace Masasamjant.AccessControl.Demo.Services
 
         private readonly IAuthenticationSecretProvider secretProvider;
         private readonly IUserService userService;
-        public DemoAuthority(IUserService userService, IAuthenticationSecretProvider secretProvider)
-            : base("Demo")
+        public DemoAuthority(IUserService userService, IAuthenticationSecretProvider secretProvider, IAuthenticationItemValidator itemValidator)
+            : base("Demo", itemValidator)
         {
             this.userService = userService;
             this.secretProvider = secretProvider;
@@ -40,6 +40,11 @@ namespace Masasamjant.AccessControl.Demo.Services
             }
         }
 
+        public override AccessControlIdentity GetAuthenticatedIdentity(AccessControlIdentity identity)
+        {
+            return new DemoAccessControlIdentity(identity, AuthenticationScheme);
+        }
+
         public override bool IsAuthoring(AccessControlIdentity identity)
         {
             var user = userService.GetUser(identity.Name);
@@ -54,6 +59,16 @@ namespace Masasamjant.AccessControl.Demo.Services
         protected override byte[] GetIdentityAuthenticationSecret(string identity, string authenticationScheme)
         {
             return secretProvider.GetAuthenticationSecret(identity, authenticationScheme);
+        }
+
+        private class DemoAccessControlIdentity : AccessControlIdentity
+        {
+            public DemoAccessControlIdentity(AccessControlIdentity identity, string authenticationScheme)
+                : base(identity.Name, true, authenticationScheme)
+            {
+                if (!identity.IsValid)
+                    throw new ArgumentException("The identity is not valid.", nameof(identity));
+            }
         }
     }
 }

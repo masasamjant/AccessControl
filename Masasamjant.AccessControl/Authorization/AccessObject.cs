@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl.Authorization
     /// <summary>
     /// Represents accessed object.
     /// </summary>
-    public class AccessObject : IEquatable<AccessObject>
+    public sealed class AccessObject : IEquatable<AccessObject>
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AccessObject"/> class.

@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl.Authentication
     /// <summary>
     /// Represents authentication token.
     /// </summary>
-    public class AuthenticationToken : IAuthenticationItem
+    public sealed class AuthenticationToken : IAuthenticationItem
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AuthenticationToken"/> class.
@@ -13,19 +13,20 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="identity">The identity value.</param>
         /// <param name="authority">The authority name.</param>
         /// <param name="claims">The claims to associate with token.</param>
-        internal AuthenticationToken(AccessControlIdentity identity, string authority, IEnumerable<AccessControlClaim> claims, IEnumerable<string> roles)
+        public AuthenticationToken(AccessControlIdentity identity, IAccessControlAuthority authority, string authenticationScheme, IEnumerable<AccessControlClaim> claims, IEnumerable<string> roles)
         {
             if (!identity.IsValid)
                 throw new ArgumentException("The identity is not valid.", nameof(identity));
 
-            if (!identity.IsAuthenticated)
-                throw new ArgumentException("The identity does not represents authenticated identity.", nameof(identity));
+            if (string.IsNullOrWhiteSpace(authenticationScheme))
 
             Identifier = Guid.NewGuid();
             Identity = identity;
             Created = DateTimeOffset.UtcNow;
             Claims = claims.ToArray();
             Roles = roles.ToArray();
+            Authority = authority.Name;
+            AuthenticationScheme = authenticationScheme;
         }
 
         /// <summary>
@@ -71,13 +72,16 @@ namespace Masasamjant.AccessControl.Authentication
         [JsonInclude]
         public string Authority { get; internal set; } = string.Empty;
 
+        [JsonInclude]
+        public string AuthenticationScheme { get; internal set; } = string.Empty;
+
         /// <summary>
         /// Gets if or not this is valid token.
         /// </summary>
         [JsonIgnore]
         public bool IsValid
         {
-            get { return !Identifier.IsEmpty() && Identity.IsValid; }
+            get { return !Identifier.IsEmpty() && Identity.IsValid && !string.IsNullOrWhiteSpace(Authority); }
         }
     }
 }
