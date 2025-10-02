@@ -78,12 +78,7 @@ namespace Masasamjant.AccessControl
             if (!identity.IsValid || !identity.IsAuthenticated)
                 return string.Empty;
 
-            var claims = new List<AccessControlClaim>();
-            
-            foreach (var claim in principal.Claims)
-                claims.Add(new AccessControlClaim(claim.Key, claim.Value, this));
-            
-            var authenticationToken = new AuthenticationToken(identity, this, authenticationScheme, claims, principal.Roles);
+            var authenticationToken = new AuthenticationToken(identity, this, authenticationScheme, principal.Claims, principal.Roles);
 
             return CreateAuthenticationToken(authenticationToken);
         }
@@ -150,8 +145,18 @@ namespace Masasamjant.AccessControl
         /// <remarks><paramref name="authenticationScheme"/> is already validated to be one of the supported ones.</remarks>
         protected abstract byte[] GetIdentityAuthenticationSecret(string identity, string authenticationScheme);
 
+        /// <summary>
+        /// Gets claims for specified principal if principal has valid authenticated identity.
+        /// </summary>
+        /// <param name="principal">The <see cref="AccessControlPrincipal"/>.</param>
+        /// <returns>A claims of principal.</returns>
         public virtual IEnumerable<AccessControlClaim> GetPrincipalClaims(AccessControlPrincipal principal) => [];
 
+        /// <summary>
+        /// Gets claims for specified principal if principal has valid authenticated identity.
+        /// </summary>
+        /// <param name="principal">The <see cref="AccessControlPrincipal"/>.</param>
+        /// <returns>A claims of principal.</returns>
         public virtual IEnumerable<string> GetPrincipalRoles(AccessControlPrincipal principal) => [];
 
         /// <summary>

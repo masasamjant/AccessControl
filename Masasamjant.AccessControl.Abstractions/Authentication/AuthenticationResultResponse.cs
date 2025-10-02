@@ -7,10 +7,15 @@ namespace Masasamjant.AccessControl.Authentication
     /// </summary>
     public sealed class AuthenticationResultResponse : AuthenticationResponse
     {
-        public AuthenticationResultResponse(AccessControlPrincipal? principal, string authority)
+        /// <summary>
+        /// Initializes new instance of the <see cref="AuthenticationResultResponse"/> class.
+        /// </summary>
+        /// <param name="principal">The <see cref="AccessControlPrincipal"/> if authenticated; <c>null</c> otherwise.</param>
+        /// <param name="authority">The <see cref="IAccessControlAuthority"/>.</param>
+        public AuthenticationResultResponse(AccessControlPrincipal? principal, IAccessControlAuthority authority)
         {
             Principal = principal;
-            Authority = authority;
+            Authority = authority.Name;
             Identifier = Guid.NewGuid();
             Created = DateTimeOffset.UtcNow;
         }
@@ -22,6 +27,9 @@ namespace Masasamjant.AccessControl.Authentication
         public AuthenticationResultResponse()
         { }
 
+        /// <summary>
+        /// Gets the <see cref="AccessControlPrincipal"/> associated with response, if authenticated.
+        /// </summary>
         [JsonInclude]
         public AccessControlPrincipal? Principal { get; internal set; }
 

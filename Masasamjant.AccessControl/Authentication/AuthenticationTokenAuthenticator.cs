@@ -47,17 +47,14 @@ namespace Masasamjant.AccessControl.Authentication
                     throw new AuthenticationException(string.IsNullOrWhiteSpace(validation.UnvalidReason) ? "Authentication token is not valid." : validation.UnvalidReason, token);
 
                 if (!token.Identity.IsAuthenticated)
-                    return new AuthenticationResultResponse(null, Authority.Name);
+                    return new AuthenticationResultResponse(null, Authority);
 
                 if (!Authority.IsAuthoring(token.Identity))
-                    return new AuthenticationResultResponse(null, Authority.Name);
+                    return new AuthenticationResultResponse(null, Authority);
 
-                var principal = new AccessControlPrincipal(token.Identity);
-                principal.SetClaims(Authority);
-                principal.SetRoles(Authority);
-                principal.CreateAuthenticationToken(Authority, token.AuthenticationScheme);
+                var principal = new AccessControlPrincipal(token.Identity, Authority, token.AuthenticationScheme);
 
-                return new AuthenticationResultResponse(principal, Authority.Name);
+                return new AuthenticationResultResponse(principal, Authority);
             }
             catch (Exception exception)
             {
