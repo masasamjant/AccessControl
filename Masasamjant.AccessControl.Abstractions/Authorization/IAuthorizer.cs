@@ -8,8 +8,6 @@ namespace Masasamjant.AccessControl.Authorization
 {
     public interface IAuthorizer
     {
-        AccessDecision Authorize(AccessRequest accessRequest);
-
         Task<AccessDecision> AuthorizeAsync(AccessRequest accessRequest);
     }
 }

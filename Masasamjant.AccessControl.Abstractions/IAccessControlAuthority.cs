@@ -1,16 +1,23 @@
 ﻿using Masasamjant.AccessControl.Authentication;
+using Masasamjant.AccessControl.Authorization;
+using Masasamjant.AccessControl.Authorization.Policies;
 
 namespace Masasamjant.AccessControl
 {
     /// <summary>
     /// Represents access control authority.
     /// </summary>
-    public interface IAccessControlAuthority : IAuthenticationSecretProvider, IAuthenticationTokenFactory, IPrincipalClaimProvider, IPrincipalRoleProvider
+    public interface IAccessControlAuthority : IAuthenticationSecretProvider, IAuthenticationTokenFactory, IPrincipalClaimProvider, IPrincipalRoleProvider, IAuthorizationEvaluatorFactory, IAccessPolicyEvaluationFactory
     {
         /// <summary>
         /// Gets the name of the authority.
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// Gets the <see cref="IAuthenticationItemValidator"/>.
+        /// </summary>
+        IAuthenticationItemValidator ItemValidator { get; }
 
         /// <summary>
         /// Creates new authentication request authorized by this authority.

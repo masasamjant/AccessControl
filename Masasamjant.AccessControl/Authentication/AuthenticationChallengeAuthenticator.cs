@@ -13,31 +13,15 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="authority">The <see cref="AccessControlAuthority"/>.</param>
         /// <param name="hashProvider">The <see cref="IHashProvider"/>.</param>
         public AuthenticationChallengeAuthenticator(IAccessControlAuthority authority, IHashProvider hashProvider, IAuthenticationRequestRepository authenticationRequestRepository)
-            : this(authority, hashProvider, authenticationRequestRepository, new DefaultAuthenticationItemValidator())
-        { }
-
-        public AuthenticationChallengeAuthenticator(IAccessControlAuthority authority, IHashProvider hashProvider, IAuthenticationRequestRepository authenticationRequestRepository, IAuthenticationItemValidator itemValidator)
         {
             Authority = authority;
             HashProvider = hashProvider;
-            ItemValidator = itemValidator;
             RequestRepository = authenticationRequestRepository;
         }
 
-        /// <summary>
-        /// Gets the <see cref="AccessControlAuthority"/>.
-        /// </summary>
         private IAccessControlAuthority Authority { get; }
 
-        /// <summary>
-        /// Gets the <see cref="IHashProvider"/>.
-        /// </summary>
         private IHashProvider HashProvider { get; }
-
-        /// <summary>
-        /// Gets the <see cref="IAuthenticationItemValidator"/>.
-        /// </summary>
-        private IAuthenticationItemValidator ItemValidator { get; }
 
         private IAuthenticationRequestRepository RequestRepository { get; }
 
@@ -51,7 +35,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// -or-
         /// If authentication process fails.
         /// </exception>
-        public AuthenticationRequestResponse RequestAuthentication(AuthenticationRequest request)
+        public async Task<AuthenticationRequestResponse> RequestAuthenticationAsync(AuthenticationRequest request)
         {
             // Check that request is valid.
             if (!request.IsValid)
@@ -64,7 +48,7 @@ namespace Masasamjant.AccessControl.Authentication
             try
             {
                 // Perform additional request validation.
-                var validation = ItemValidator.IsValidRequest(request);
+                var validation = Authority.ItemValidator.IsValidRequest(request);
 
                 if (!validation.IsValid)
                     throw new AuthenticationException(string.IsNullOrWhiteSpace(validation.UnvalidReason) ? "Authentication request is not valid" : validation.UnvalidReason, request);
@@ -77,7 +61,7 @@ namespace Masasamjant.AccessControl.Authentication
                 var response = new AuthenticationRequestResponse(request);
 
                 // Save authentication request for later.
-                RequestRepository.SaveAuthenticationRequest(request);
+                await RequestRepository.SaveAuthenticationRequestAsync(request);
 
                 // Return response.
                 return response;
@@ -101,7 +85,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// -or-
         /// If authentication process fails.
         /// </exception>
-        public AuthenticationResultResponse AuthenticateChallenge(AuthenticationChallenge challenge)
+        public async Task<AuthenticationResultResponse> AuthenticateChallengeAsync(AuthenticationChallenge challenge)
         {
             // Check that challenge is valid.
             if (!challenge.IsValid)
@@ -118,20 +102,20 @@ namespace Masasamjant.AccessControl.Authentication
             try
             {
                 // Perform additional challenge validation.
-                var validation = ItemValidator.IsValidChallenge(challenge);
+                var validation = Authority.ItemValidator.IsValidChallenge(challenge);
 
                 if (!validation.IsValid)
                     throw new AuthenticationException(string.IsNullOrWhiteSpace(validation.UnvalidReason) ? "Authentication challenge is not valid." : validation.UnvalidReason, challenge);
 
                 // Get request saved that match this challenge.
-                var request = RequestRepository.GetAuthenticationRequest(challenge.Identifier);
+                var request = await RequestRepository.GetAuthenticationRequestAsync(challenge.Identifier);
 
                 // No such request, return unauthenticated response.
                 if (request == null || string.IsNullOrWhiteSpace(request.Identity.Name))
                     return new AuthenticationResultResponse(null, Authority);
 
                 // Gets the authentication secret.
-                var secret = Authority.GetAuthenticationSecret(request.Identity.Name, request.AuthenticationScheme);
+                var secret = await Authority.GetAuthenticationSecretAsync(request.Identity, request.AuthenticationScheme);
 
                 // Gets the challange from saved request.
                 var requestChallenge = request.CreateAuthenticationChallenge(secret, HashProvider);
@@ -152,7 +136,7 @@ namespace Masasamjant.AccessControl.Authentication
                     if (!identity.IsAuthenticated)
                         return new AuthenticationResultResponse(null, Authority);
 
-                    var principal = new AccessControlPrincipal(identity, Authority, request.AuthenticationScheme);
+                    var principal = await AccessControlPrincipal.CreateAsync(identity, Authority, request.AuthenticationScheme);
 
                     return new AuthenticationResultResponse(principal, Authority);
                 }

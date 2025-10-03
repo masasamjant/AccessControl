@@ -10,12 +10,12 @@
         /// </summary>
         /// <param name="identifier">The authentication request identifier.</param>
         /// <returns>A <see cref="AuthenticationRequest"/> or <c>null</c>, if not exist.</returns>
-        AuthenticationRequest? GetAuthenticationRequest(Guid identifier);
+        Task<AuthenticationRequest?> GetAuthenticationRequestAsync(Guid identifier);
 
         /// <summary>
         /// Saves authentication request.
         /// </summary>
         /// <param name="request">The <see cref="AuthenticationRequest"/> to save.</param>
-        void SaveAuthenticationRequest(AuthenticationRequest request);
+        Task SaveAuthenticationRequestAsync(AuthenticationRequest request);
     }
 }

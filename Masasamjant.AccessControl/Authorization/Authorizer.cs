@@ -1,32 +1,49 @@
 ﻿using Masasamjant.AccessControl.Authentication;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Masasamjant.AccessControl.Authorization
 {
-    public sealed class Authorizer
+    public sealed class Authorizer : IAuthorizer
     {
-        public Authorizer(AccessControlAuthority authority, IAuthenticationTokenAuthenticator authenticator)
+        public Authorizer(IAccessControlAuthority authority)
         {
             Authority = authority;
-            Authenticator = authenticator;
+            Authenticator = new AuthenticationTokenAuthenticator(Authority);
         }
 
-        private AccessControlAuthority Authority { get; }
+        private IAccessControlAuthority Authority { get; }
 
-        private IAuthenticationTokenAuthenticator Authenticator { get; }
+        private AuthenticationTokenAuthenticator Authenticator { get; }
 
-        public AccessDecision Authorize(AccessRequest accessRequest)
+        public async Task<AccessDecision> AuthorizeAsync(AccessRequest accessRequest)
         {
-            throw new NotImplementedException();
-        }
+            if (!accessRequest.IsValid)
+                return AccessDecision.Denied(accessRequest);
 
-        public Task<AccessDecision> AuthorizeAsync(AccessRequest accessRequest) 
-        {
-            throw new NotImplementedException();
+            if (!accessRequest.Subject.Principal.Identity.IsAuthenticated || string.IsNullOrWhiteSpace(accessRequest.Subject.Principal.AuthenticationToken))
+                return AccessDecision.Denied(accessRequest);
+
+            var response = await Authenticator.AuthenticateTokenAsync(accessRequest.Subject.Principal.AuthenticationToken);
+
+            if (response.Result == AuthenticationResult.Unauthenticated)
+                return AccessDecision.Denied(accessRequest);
+
+            var evaluators = await Authority.GetAuthorizationEvaluatorsAsync();
+
+            if (!evaluators.Any())
+                return AccessDecision.Denied(accessRequest);
+
+            foreach (var evaluator in evaluators) 
+            {
+                var decision = await evaluator.EvaluateAsync(accessRequest);
+
+                if (!decision.IsValid)
+                    throw new InvalidOperationException($"Evaluator '{evaluator.GetType()}' returned invalid access decision.");
+
+                if (decision.Result == AccessResult.Deny)
+                    return AccessDecision.Denied(accessRequest);
+            }
+
+            return AccessDecision.Granted(accessRequest);
         }
     }
 }

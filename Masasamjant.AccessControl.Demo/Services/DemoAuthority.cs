@@ -1,4 +1,5 @@
 ﻿using Masasamjant.AccessControl.Authentication;
+using System.Text;
 using System.Text.Json;
 
 namespace Masasamjant.AccessControl.Demo.Services
@@ -19,14 +20,15 @@ namespace Masasamjant.AccessControl.Demo.Services
         protected override string[] AuthenticationSchemes => [AuthenticationScheme];
 
 
-        public override AuthenticationToken CreateAuthenticationToken(string authenticationTokenString)
+        public override async Task<AuthenticationToken> CreateAuthenticationTokenAsync(string authenticationTokenString)
         {
             if (string.IsNullOrWhiteSpace(authenticationTokenString))
                 return new AuthenticationToken();
 
             try
             {
-                var authenticationToken = JsonSerializer.Deserialize<AuthenticationToken>(authenticationTokenString);
+                var stream = new MemoryStream(authenticationTokenString.GetByteArray(Encoding.UTF8));
+                var authenticationToken = await JsonSerializer.DeserializeAsync<AuthenticationToken>(stream);
 
                 // No valid token or token not authorized by this authority > return invalid token.
                 if (authenticationToken == null || !IsAuthoring(authenticationToken))
@@ -51,14 +53,17 @@ namespace Masasamjant.AccessControl.Demo.Services
             return user != null;
         }
 
-        protected override string CreateAuthenticationToken(AuthenticationToken authenticationToken)
+        protected override async Task<string> CreateAuthenticationTokenAsync(AuthenticationToken authenticationToken)
         {
-            return JsonSerializer.Serialize(authenticationToken);
+            var stream = new MemoryStream();
+            await JsonSerializer.SerializeAsync(stream, authenticationToken);
+            var buffer = stream.ToArray();
+            return Encoding.UTF8.GetString(buffer);
         }
 
-        protected override byte[] GetIdentityAuthenticationSecret(string identity, string authenticationScheme)
+        protected override Task<byte[]> GetIdentityAuthenticationSecretAsync(AccessControlIdentity identity, string authenticationScheme)
         {
-            return secretProvider.GetAuthenticationSecret(identity, authenticationScheme);
+            return secretProvider.GetAuthenticationSecretAsync(identity, authenticationScheme);
         }
 
         private class DemoAccessControlIdentity : AccessControlIdentity

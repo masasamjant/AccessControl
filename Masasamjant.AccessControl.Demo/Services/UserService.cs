@@ -42,5 +42,10 @@ namespace Masasamjant.AccessControl.Demo.Services
             var user = GetUser(identity);
             return user != null ? Convert.FromBase64String(user.Password) : [];
         }
+
+        Task<byte[]> IAuthenticationSecretProvider.GetAuthenticationSecretAsync(AccessControlIdentity identity, string authenticationScheme)
+        {
+            return Task.FromResult(this.GetAuthenticationSecret(identity.Name, authenticationScheme));
+        }
     }
 }

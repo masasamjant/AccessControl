@@ -14,18 +14,20 @@ namespace Masasamjant.AccessControl.Authentication
         /// </summary>
         /// <param name="identifier">The authentication request identifier.</param>
         /// <returns>A <see cref="AuthenticationRequest"/> or <c>null</c>, if not exist.</returns>
-        public AuthenticationRequest? GetAuthenticationRequest(Guid identifier)
+        public Task<AuthenticationRequest?> GetAuthenticationRequestAsync(Guid identifier)
         {
-            return requests.TryRemove(identifier, out var authenticationRequest) ? authenticationRequest : null;
+            var request = requests.TryRemove(identifier, out var authenticationRequest) ? authenticationRequest : null;
+            return Task.FromResult(request);
         }
 
         /// <summary>
         /// Saves authentication request.
         /// </summary>
         /// <param name="request">The <see cref="AuthenticationRequest"/> to save.</param>
-        public void SaveAuthenticationRequest(AuthenticationRequest request)
+        public Task SaveAuthenticationRequestAsync(AuthenticationRequest request)
         {
             requests.AddOrUpdate(request.Identifier, request, (k, v) => request);
+            return Task.CompletedTask;
         }
     }
 }

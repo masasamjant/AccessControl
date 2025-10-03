@@ -11,6 +11,13 @@
         /// <param name="principal">The <see cref="AccessControlPrincipal"/>.</param>
         /// <param name="authenticationScheme">The authentication scheme.</param>
         /// <returns>A authentication token string.</returns>
-        string CreateAuthenticationToken(AccessControlPrincipal principal, string authenticationScheme);
+        Task<string> CreateAuthenticationTokenAsync(AccessControlPrincipal principal, string authenticationScheme);
+
+        /// <summary>
+        /// Creates <see cref="AuthenticationToken"/> from specified authentication token string.
+        /// </summary>
+        /// <param name="authenticationTokenString">The authentication token string.</param>
+        /// <returns>A <see cref="AuthenticationToken"/>.</returns>
+        Task<AuthenticationToken> CreateAuthenticationTokenAsync(string authenticationTokenString);
     }
 }

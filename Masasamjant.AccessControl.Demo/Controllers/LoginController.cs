@@ -32,15 +32,15 @@ namespace Masasamjant.AccessControl.Demo.Controllers
         {
             var identity = new AccessControlIdentity(model.UserName);
             var request = authority.CreateAuthenticationRequest(identity, DemoAuthority.AuthenticationScheme);
-            var requestResponse = authenticator.RequestAuthentication(request);
+            var requestResponse = await authenticator.RequestAuthenticationAsync(request);
 
             if (!requestResponse.IsValid)
                 return RedirectToAction(nameof(Index));
 
             var secretProvider = new ClientSecretProvider(model.UserName, model.Password, hashProvider);
-            var secret = secretProvider.GetAuthenticationSecret(model.UserName, DemoAuthority.AuthenticationScheme);
+            var secret = await secretProvider.GetAuthenticationSecretAsync(identity, DemoAuthority.AuthenticationScheme);
             var challenge = requestResponse.Request.CreateAuthenticationChallenge(secret, hashProvider);
-            var response = authenticator.AuthenticateChallenge(challenge);
+            var response = await authenticator.AuthenticateChallengeAsync(challenge);
             var principal = response.Principal;
 
             if (response.Result == AuthenticationResult.Authenticated && principal != null && !string.IsNullOrWhiteSpace(principal.AuthenticationToken))

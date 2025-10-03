@@ -15,7 +15,7 @@
         /// -or-
         /// If authentication process fails.
         /// </exception>
-        AuthenticationRequestResponse RequestAuthentication(AuthenticationRequest request);
+        Task<AuthenticationRequestResponse> RequestAuthenticationAsync(AuthenticationRequest request);
 
         /// <summary>
         /// Authenticates specified <see cref="AuthenticationChallenge"/>.
@@ -27,6 +27,6 @@
         /// -or-
         /// If authentication process fails.
         /// </exception>
-        AuthenticationResultResponse AuthenticateChallenge(AuthenticationChallenge challenge);
+        Task<AuthenticationResultResponse> AuthenticateChallengeAsync(AuthenticationChallenge challenge);
     }
 }

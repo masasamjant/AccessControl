@@ -17,15 +17,13 @@ namespace Masasamjant.AccessControl.Demo
             this.secret = userPassword.PasswordData;
         }
 
-        public byte[] GetAuthenticationSecret(string identity, string authenticationScheme)
+        public Task<byte[]> GetAuthenticationSecretAsync(AccessControlIdentity identity, string authenticationScheme)
         {
             if (authenticationScheme.ToUpperInvariant() != DemoAuthority.AuthenticationScheme)
                 throw new NotSupportedException($"Authentication scheme '{authenticationScheme}' is not supported.");
 
-            if (name != identity)
-                return [];
-
-            return secret;
+            var result = name == identity.Name ? secret : [];
+            return Task.FromResult(result);
         }
     }
 }

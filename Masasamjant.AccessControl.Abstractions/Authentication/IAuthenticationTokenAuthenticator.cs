@@ -15,6 +15,6 @@
         /// -or-
         /// If authentication process fails.
         /// </exception>
-        AuthenticationResultResponse AuthenticateToken(string authenticationToken);
+        Task<AuthenticationResultResponse> AuthenticateTokenAsync(string authenticationToken);
     }
 }

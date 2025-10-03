@@ -1,11 +1,14 @@
 ﻿using Masasamjant.AccessControl.Authentication;
+using Masasamjant.AccessControl.Authorization;
+using Masasamjant.AccessControl.Authorization.Policies;
+using System.Reflection;
 
 namespace Masasamjant.AccessControl
 {
     /// <summary>
     /// Represents abstract access control authority.
     /// </summary>
-    public abstract class AccessControlAuthority : IAccessControlAuthority, IAuthenticationSecretProvider, IAuthenticationTokenFactory, IPrincipalClaimProvider, IPrincipalRoleProvider
+    public abstract class AccessControlAuthority : IAccessControlAuthority, IAuthenticationSecretProvider, IAuthenticationTokenFactory, IPrincipalClaimProvider, IPrincipalRoleProvider, IAuthorizationEvaluatorFactory, IAccessPolicyEvaluationFactory
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AccessControlAuthority"/> class.
@@ -36,7 +39,7 @@ namespace Masasamjant.AccessControl
         /// <summary>
         /// Gets the <see cref="IAuthenticationItemValidator"/>.
         /// </summary>
-        protected IAuthenticationItemValidator ItemValidator { get; }
+        public IAuthenticationItemValidator ItemValidator { get; }
 
         /// <summary>
         /// Creates new authentication request authorized by this authority.
@@ -69,7 +72,7 @@ namespace Masasamjant.AccessControl
         /// </summary>
         /// <param name="principal">The <see cref="AccessControlPrincipal"/>.</param>
         /// <returns>A authentication token string.</returns>
-        public string CreateAuthenticationToken(AccessControlPrincipal principal, string authenticationScheme)
+        public async Task<string> CreateAuthenticationTokenAsync(AccessControlPrincipal principal, string authenticationScheme)
         {
             CheckAuthenticationScheme(authenticationScheme);
 
@@ -78,9 +81,9 @@ namespace Masasamjant.AccessControl
             if (!identity.IsValid || !identity.IsAuthenticated)
                 return string.Empty;
 
-            var authenticationToken = new AuthenticationToken(identity, this, authenticationScheme, principal.Claims, principal.Roles);
+            var authenticationToken = new AuthenticationToken(identity, this, authenticationScheme, principal.Claims, principal.Roles.Select(x => x.FullName));
 
-            return CreateAuthenticationToken(authenticationToken);
+            return await CreateAuthenticationTokenAsync(authenticationToken);
         }
 
         /// <summary>
@@ -88,14 +91,14 @@ namespace Masasamjant.AccessControl
         /// </summary>
         /// <param name="authenticationTokenString">The authentication token string.</param>
         /// <returns>A <see cref="AuthenticationToken"/>.</returns>
-        public abstract AuthenticationToken CreateAuthenticationToken(string authenticationTokenString);
+        public abstract Task<AuthenticationToken> CreateAuthenticationTokenAsync(string authenticationTokenString);
 
         /// <summary>
         /// Creates string value from specified authentication token.
         /// </summary>
         /// <param name="authenticationToken">The <see cref="AuthenticationToken"/>.</param>
         /// <returns>A authentication token string.</returns>
-        protected abstract string CreateAuthenticationToken(AuthenticationToken authenticationToken);
+        protected abstract Task<string> CreateAuthenticationTokenAsync(AuthenticationToken authenticationToken);
 
         /// <summary>
         /// Check if is authoring specified <see cref="IAuthenticationItem"/>.
@@ -122,11 +125,11 @@ namespace Masasamjant.AccessControl
         /// <returns>A data of the secter or empty array if there is not such identity or if identity do not have secret in specified authentication scheme.</returns>
         /// <exception cref="ArgumentNullException">If value of <paramref name="authenticationScheme"/> is empty or only whitespace.</exception>
         /// <exception cref="NotSupportedException">If authentication scheme specified by <paramref name="authenticationScheme"/> is not supported.</exception>
-        public byte[] GetAuthenticationSecret(string identity, string authenticationScheme)
+        public Task<byte[]> GetAuthenticationSecretAsync(AccessControlIdentity identity, string authenticationScheme)
         {
             CheckAuthenticationScheme(authenticationScheme);
 
-            return GetIdentityAuthenticationSecret(identity, authenticationScheme);
+            return GetIdentityAuthenticationSecretAsync(identity, authenticationScheme);
         }
 
         /// <summary>
@@ -143,21 +146,86 @@ namespace Masasamjant.AccessControl
         /// <param name="authenticationScheme">The authentication scheme. The value depends on implementation.</param>
         /// <returns>A data of the secter or empty array if there is not such identity or if identity do not have secret in specified authentication scheme.</returns>
         /// <remarks><paramref name="authenticationScheme"/> is already validated to be one of the supported ones.</remarks>
-        protected abstract byte[] GetIdentityAuthenticationSecret(string identity, string authenticationScheme);
+        protected abstract Task<byte[]> GetIdentityAuthenticationSecretAsync(AccessControlIdentity identity, string authenticationScheme);
 
         /// <summary>
         /// Gets claims for specified principal if principal has valid authenticated identity.
         /// </summary>
         /// <param name="principal">The <see cref="AccessControlPrincipal"/>.</param>
         /// <returns>A claims of principal.</returns>
-        public virtual IEnumerable<AccessControlClaim> GetPrincipalClaims(AccessControlPrincipal principal) => [];
+        public virtual Task<IEnumerable<AccessControlClaim>> GetPrincipalClaimsAsync(AccessControlPrincipal principal) => Task.FromResult(Enumerable.Empty<AccessControlClaim>());
 
         /// <summary>
-        /// Gets claims for specified principal if principal has valid authenticated identity.
+        /// Gets roles assigned to specified principal if principal has valid authenticated identity.
         /// </summary>
         /// <param name="principal">The <see cref="AccessControlPrincipal"/>.</param>
-        /// <returns>A claims of principal.</returns>
-        public virtual IEnumerable<string> GetPrincipalRoles(AccessControlPrincipal principal) => [];
+        /// <returns>A roles assigned to principal.</returns>
+        public virtual Task<IEnumerable<AccessControlRole>> GetPrincipalRolesAsync(AccessControlPrincipal principal) => Task.FromResult(Enumerable.Empty<AccessControlRole>());
+
+        /// <summary>
+        /// Gets the <see cref="IAuthorizationEvaluator"/> implementations. By default search implementations from assemblies of 
+        /// current app domain and tries to create instance using parameterless constructor.
+        /// </summary>
+        /// <returns>A <see cref="IAuthorizationEvaluator"/> implementations.</returns>
+        public virtual Task<IEnumerable<IAuthorizationEvaluator>> GetAuthorizationEvaluatorsAsync()
+        {
+            var evaluators = new List<IAuthorizationEvaluator>();
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var interfaceTypes = assembly.GetTypes().Where(type => type.GetInterfaces().Any(x => x.Equals(typeof(IAuthorizationEvaluator))));
+
+                foreach (var interfaceType in interfaceTypes)
+                {
+                    if (!interfaceType.IsConcrete())
+                        continue;
+
+                    var evaluator = TryCreateInstance<IAuthorizationEvaluator>(interfaceType);
+
+                    if (evaluator != null)
+                        evaluators.Add(evaluator);
+                }
+            }
+
+            return Task.FromResult(evaluators.AsEnumerable());
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IAccessPolicyEvaluation"/> for specified access policy. By default search impelementations from assemblies of 
+        /// current app domain and tries to create instance using parameterless constructor.
+        /// </summary>
+        /// <param name="policy">The <see cref="AccessPolicy"/>.</param>
+        /// <returns>A <see cref="IAccessPolicyEvaluation"/> or <c>null</c>, if no evaluations for policy.</returns>
+        public virtual Task<IAccessPolicyEvaluation?> GetAccessPolicyEvaluationAsync(AccessPolicy policy)
+        {
+            IAccessPolicyEvaluation? evaluation = null;
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var interfaceTypes = assembly.GetTypes().Where(type => type.GetInterfaces().Any(x => x.Equals(typeof(IAccessPolicyEvaluation))));
+
+                foreach (var interfaceType in interfaceTypes)
+                {
+                    if (!interfaceType.IsConcrete())
+                        continue;
+
+                    var attributes = interfaceType.GetCustomAttributes<AccessPolicyAttribute>(false);
+
+                    if (attributes.Any(attr => attr.PolicyName == policy.Name))
+                    {
+                        evaluation = TryCreateInstance<IAccessPolicyEvaluation>(interfaceType);
+
+                        if (evaluation != null)
+                            break;
+                    }
+                }
+
+                if (evaluation != null)
+                    break;
+            }
+
+            return Task.FromResult(evaluation);
+        }
 
         /// <summary>
         /// Validates that value of <paramref name="authenticationScheme"/> is not empty or only whitespace and that it is supported. 
@@ -172,6 +240,18 @@ namespace Masasamjant.AccessControl
 
             if (!IsSupportedAuthentication(authenticationScheme))
                 throw new NotSupportedException($"Authentication scheme '{authenticationScheme}' is not supported by '{Name}' authority.");
+        }
+
+        protected static TInstance? TryCreateInstance<TInstance>(Type type) where TInstance : class
+        {
+            try
+            {
+                return Activator.CreateInstance(type) as TInstance;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

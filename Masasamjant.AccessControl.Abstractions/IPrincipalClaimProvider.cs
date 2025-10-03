@@ -10,6 +10,6 @@
         /// </summary>
         /// <param name="principal">The <see cref="AccessControlPrincipal"/>.</param>
         /// <returns>A claims of principal.</returns>
-        IEnumerable<AccessControlClaim> GetPrincipalClaims(AccessControlPrincipal principal);
+        Task<IEnumerable<AccessControlClaim>> GetPrincipalClaimsAsync(AccessControlPrincipal principal);
     }
 }

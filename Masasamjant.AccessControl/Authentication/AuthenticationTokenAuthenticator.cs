@@ -1,26 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Masasamjant.AccessControl.Authentication
+﻿namespace Masasamjant.AccessControl.Authentication
 {
+    /// <summary>
+    /// Represents authenticator that authenticates tokens.
+    /// </summary>
     public sealed class AuthenticationTokenAuthenticator : IAuthenticationTokenAuthenticator
     {
-        public AuthenticationTokenAuthenticator(AccessControlAuthority authority)
-            : this(authority, new DefaultAuthenticationItemValidator())
-        { }
-
-        public AuthenticationTokenAuthenticator(AccessControlAuthority authority, IAuthenticationItemValidator itemValidator)
+        /// <summary>
+        /// Initializes new instance of the <see cref="AuthenticationTokenAuthenticator"/> class.
+        /// </summary>
+        /// <param name="authority">The <see cref="IAccessControlAuthority"/>.</param>
+        public AuthenticationTokenAuthenticator(IAccessControlAuthority authority)
         {
             Authority = authority;
-            ItemValidator = itemValidator;
         }
 
-        private IAuthenticationItemValidator ItemValidator { get; }
-
-        private AccessControlAuthority Authority { get; }
+        private IAccessControlAuthority Authority { get; }
 
         /// <summary>
         /// Authenticates specified <see cref="AuthenticationToken"/>.
@@ -32,16 +26,16 @@ namespace Masasamjant.AccessControl.Authentication
         /// -or-
         /// If authentication process fails.
         /// </exception>
-        public AuthenticationResultResponse AuthenticateToken(string authenticationToken)
+        public async Task<AuthenticationResultResponse> AuthenticateTokenAsync(string authenticationToken)
         {
-            var token = Authority.CreateAuthenticationToken(authenticationToken);
+            var token = await Authority.CreateAuthenticationTokenAsync(authenticationToken);
 
             if (!token.IsValid)
                 throw new AuthenticationException("Authentication token is not valid.", token);
 
             try
             {
-                var validation = ItemValidator.IsValidToken(token);
+                var validation = Authority.ItemValidator.IsValidToken(token);
 
                 if (!validation.IsValid)
                     throw new AuthenticationException(string.IsNullOrWhiteSpace(validation.UnvalidReason) ? "Authentication token is not valid." : validation.UnvalidReason, token);
@@ -52,7 +46,7 @@ namespace Masasamjant.AccessControl.Authentication
                 if (!Authority.IsAuthoring(token.Identity))
                     return new AuthenticationResultResponse(null, Authority);
 
-                var principal = new AccessControlPrincipal(token.Identity, Authority, token.AuthenticationScheme);
+                var principal = await AccessControlPrincipal.CreateAsync(token.Identity, Authority, token.AuthenticationScheme);
 
                 return new AuthenticationResultResponse(principal, Authority);
             }

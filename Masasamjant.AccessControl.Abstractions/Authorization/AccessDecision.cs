@@ -57,10 +57,20 @@ namespace Masasamjant.AccessControl.Authorization
             get { return Request.IsValid && Enum.IsDefined(Result); }
         }
 
-        internal static AccessDecision Denied(AccessRequest request)
+        /// <summary>
+        /// Creates <see cref="AccessDecision"/> for denied access.
+        /// </summary>
+        /// <param name="request">The <see cref="AccessRequest"/>.</param>
+        /// <returns>A <see cref="AccessDecision"/> of denied access.</returns>
+        public static AccessDecision Denied(AccessRequest request)
             => new AccessDecision(request, AccessResult.Deny);
 
-        internal static AccessDecision Granted(AccessRequest request)
+        /// <summary>
+        /// Creates <see cref="AccessDecision"/> for granted access.
+        /// </summary>
+        /// <param name="request">The <see cref="AccessRequest"/>.</param>
+        /// <returns>A <see cref="AccessDecision"/> of granted access.</returns>
+        public static AccessDecision Granted(AccessRequest request)
             => new AccessDecision(request, AccessResult.Grant);
     }
 }
