@@ -19,7 +19,7 @@ namespace Masasamjant.AccessControl.Demo
 
         public Task<byte[]> GetAuthenticationSecretAsync(AccessControlIdentity identity, string authenticationScheme)
         {
-            if (authenticationScheme.ToUpperInvariant() != DemoAuthority.AuthenticationScheme)
+            if (authenticationScheme.ToUpperInvariant() != DemoAuthority.AuthenticationScheme.ToUpperInvariant())
                 throw new NotSupportedException($"Authentication scheme '{authenticationScheme}' is not supported.");
 
             var result = name == identity.Name ? secret : [];

@@ -1,4 +1,5 @@
 ﻿using Masasamjant.AccessControl.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Text;
 using System.Text.Json;
 
@@ -6,7 +7,7 @@ namespace Masasamjant.AccessControl.Demo.Services
 {
     public class DemoAuthority : AccessControlAuthority
     {
-        internal const string AuthenticationScheme = "PASSWORD";
+        internal const string AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
         private readonly IAuthenticationSecretProvider secretProvider;
         private readonly IUserService userService;

@@ -23,10 +23,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Masasamjant.Framework" Version="1.4.2" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
@@ -35,11 +31,6 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Authorization\Policies\" />
-    <Folder Include="Authorization\Roles\" />
   </ItemGroup>
 
   <ItemGroup>

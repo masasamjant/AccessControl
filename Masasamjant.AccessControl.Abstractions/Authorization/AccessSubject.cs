@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl.Authorization
     /// <summary>
     /// Represents accessing subject.
     /// </summary>
-    public class AccessSubject
+    public sealed class AccessSubject
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AccessSubject"/> class.
@@ -44,7 +44,7 @@ namespace Masasamjant.AccessControl.Authorization
         [JsonIgnore]
         public bool IsValid
         {
-            get { return Principal.Identity.IsValid && Principal.Identity.IsAuthenticated && !string.IsNullOrWhiteSpace(Principal.AuthenticationToken); }
+            get { return Principal.IsAuthenticatePrincipal(); }
         }
     }
 }

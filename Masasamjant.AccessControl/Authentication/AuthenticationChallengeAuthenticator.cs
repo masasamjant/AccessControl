@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl.Authentication
     /// <summary>
     /// Represents authentication challenge authenticator.
     /// </summary>
-    public sealed class AuthenticationChallengeAuthenticator : IAuthenticationChallengeAuthenticator
+    public sealed class AuthenticationChallengeAuthenticator : Authenticator, IAuthenticationChallengeAuthenticator
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AuthenticationChallengeAuthenticator"/> class.
@@ -13,13 +13,11 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="authority">The <see cref="AccessControlAuthority"/>.</param>
         /// <param name="hashProvider">The <see cref="IHashProvider"/>.</param>
         public AuthenticationChallengeAuthenticator(IAccessControlAuthority authority, IHashProvider hashProvider, IAuthenticationRequestRepository authenticationRequestRepository)
+            : base(authority)
         {
-            Authority = authority;
             HashProvider = hashProvider;
             RequestRepository = authenticationRequestRepository;
         }
-
-        private IAccessControlAuthority Authority { get; }
 
         private IHashProvider HashProvider { get; }
 

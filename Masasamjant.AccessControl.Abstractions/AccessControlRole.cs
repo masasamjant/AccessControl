@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Masasamjant.AccessControl.Authorization;
+using System.Text.Json.Serialization;
 
 namespace Masasamjant.AccessControl
 {
@@ -34,7 +35,7 @@ namespace Masasamjant.AccessControl
                 throw new ArgumentException($"The application name cannot have {NameSeparator} character.", nameof(applicationName));
 
             RoleName = roleName;
-            ApplicationName = applicationName;
+            ApplicationName = AccessObject.ValidateApplicationName(applicationName);
             FullName = ApplicationName + NameSeparator + RoleName;
         }
 

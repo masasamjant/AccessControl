@@ -198,7 +198,14 @@ namespace Masasamjant.AccessControl
         /// <returns>A <see cref="IAccessPolicyEvaluation"/> or <c>null</c>, if no evaluations for policy.</returns>
         public virtual Task<IAccessPolicyEvaluation?> GetAccessPolicyEvaluationAsync(AccessPolicy policy)
         {
+            if (!policy.IsValid)
+                throw new ArgumentException("The access policy is not valid.", nameof(policy));
+
             IAccessPolicyEvaluation? evaluation = null;
+
+            // Policy not enabled, return null.
+            if (!policy.IsEnabled)
+                return Task.FromResult(evaluation);
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {

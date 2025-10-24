@@ -5,6 +5,12 @@
     /// </summary>
     public abstract class RoleAuthorizationEvaluator : AuthorizationEvaluator
     {
+        /// <summary>
+        /// Evaluates access request and returns access decision based on evaluation.
+        /// Before invoking this it is ensured that <paramref name="request"/> is valid and subject principal is authenticated.
+        /// </summary>
+        /// <param name="request">The <see cref="AccessRequest"/> to evaluate</param>
+        /// <returns>A <see cref="AccessDecision"/>.</returns>
         protected override async Task<AccessDecision> EvaluateRequestAsync(AccessRequest request)
         {
             var principalRoles = request.Subject.Principal.Roles;
@@ -42,8 +48,8 @@
         /// Gets the access roles of the specified access object. If any of returned roles deny access, then access is denied. 
         /// Otherwise access is granted.
         /// </summary>
-        /// <param name="obj">The <see cref="AccessObject"/>.</param>
+        /// <param name="accessObject">The <see cref="AccessObject"/>.</param>
         /// <returns>A roles that have access or no access to specified object, if empty then access is denied.</returns>
-        protected abstract Task<IEnumerable<AccessRole>> GetObjectRolesAsync(AccessObject obj);
+        protected abstract Task<IEnumerable<AccessRole>> GetObjectRolesAsync(AccessObject accessObject);
     }
 }

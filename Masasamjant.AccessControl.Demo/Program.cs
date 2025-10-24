@@ -1,5 +1,9 @@
 using Masasamjant.AccessControl.Authentication;
+using Masasamjant.AccessControl.Authorization;
 using Masasamjant.AccessControl.Demo.Services;
+using Masasamjant.AccessControl.Web;
+using Masasamjant.AccessControl.Web.Authentication;
+using Masasamjant.AccessControl.Web.Authorization;
 using Masasamjant.Security;
 using Masasamjant.Security.Abstractions;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -17,12 +21,18 @@ namespace Masasamjant.AccessControl.Demo
 
             var hashProvider = new SHA256HashProvider();
             builder.Services.AddSingleton<IHashProvider>(hashProvider);
-            builder.Services.AddTransient<IUserService, UserService>();
-            builder.Services.AddTransient<IAuthenticationSecretProvider, UserService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IAuthenticationSecretProvider, UserService>();
             builder.Services.AddSingleton<IAuthenticationItemValidator, DemoAuthenticationItemValidator>();
             builder.Services.AddSingleton<IAuthenticationRequestRepository, AuthenticationRequestRepository>();
-            builder.Services.AddTransient<IAccessControlAuthority, DemoAuthority>();
-            builder.Services.AddTransient<IAuthenticationChallengeAuthenticator, AuthenticationChallengeAuthenticator>();
+            builder.Services.AddScoped<IAccessControlAuthority, DemoAuthority>();
+            builder.Services.AddScoped<IAuthenticationChallengeAuthenticator, AuthenticationChallengeAuthenticator>();
+            builder.Services.AddScoped<IAuthenticationTokenAuthenticator, AuthenticationTokenAuthenticator>();
+            builder.Services.AddScoped<IAuthorizer, Authorizer>();
+            builder.Services.AddAccessControlPrincipalStore("ACCESS-CONTROL-PRINCIPAL");
+            builder.Services.AddAccessControlUrlProvider("/Home/Forbidden", "/Login", null);
+            builder.Services.AddAuthenticationContextProvider();
+            builder.Services.AddAuthorizationContextProvider();
 
             var service = new UserService(hashProvider);
             service.AddUser("admin", "Good4Life!");
@@ -39,7 +49,6 @@ namespace Masasamjant.AccessControl.Demo
 
             var app = builder.Build();
             app.UseAuthentication();
-            app.UseAuthorization();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -49,6 +58,7 @@ namespace Masasamjant.AccessControl.Demo
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseAccessControl();
 
             app.MapStaticAssets();
             app.MapControllerRoute(

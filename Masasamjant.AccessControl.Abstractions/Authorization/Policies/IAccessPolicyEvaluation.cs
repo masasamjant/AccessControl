@@ -18,6 +18,7 @@
         /// <param name="policy">The access policy to evaluate.</param>
         /// <param name="identity">The access control identity to evaluate policy against with.</param>
         /// <returns>A <see cref="AccessResult"/> of policy evaluation.</returns>
+        /// <exception cref="ArgumentException">If cannot evaluate policy.</exception>
         Task<AccessResult> EvaluateAsync(AccessPolicy policy, AccessControlIdentity identity);
     }
 }

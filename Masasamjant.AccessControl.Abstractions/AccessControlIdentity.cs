@@ -38,7 +38,7 @@ namespace Masasamjant.AccessControl
         /// <param name="authenticated"><c>true</c> if represents authenticated identity; <c>false</c> otherwise.</param>
         /// <param name="authenticationScheme">The authentication scheme.</param>
         /// <exception cref="ArgumentNullException">If value of <paramref name="name"/> is empty or only whitespace.</exception>
-        protected AccessControlIdentity(string name, bool authenticated, string authenticationScheme)
+        protected internal AccessControlIdentity(string name, bool authenticated, string authenticationScheme)
             : this(name)
         {
             IsAuthenticated = authenticated;

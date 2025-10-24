@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents authenticator that authenticates challenges.
     /// </summary>
-    public interface IAuthenticationChallengeAuthenticator
+    public interface IAuthenticationChallengeAuthenticator : IAuthenticator
     {
         /// <summary>
         /// Begin authentication process by requesting authentication.

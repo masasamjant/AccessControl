@@ -1,4 +1,5 @@
 using Masasamjant.AccessControl.Demo.Models;
+using Masasamjant.AccessControl.Web.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,7 @@ using System.Diagnostics;
 
 namespace Masasamjant.AccessControl.Demo.Controllers
 {
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [AccessControlAuthentication]
     public class HomeController : Controller
     {
         public HomeController()

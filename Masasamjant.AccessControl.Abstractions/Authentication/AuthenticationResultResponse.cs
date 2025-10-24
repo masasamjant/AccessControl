@@ -41,7 +41,7 @@ namespace Masasamjant.AccessControl.Authentication
         {
             get
             {
-                if (Principal != null && Principal.Identity.IsAuthenticated)
+                if (Principal.IsAuthenticatePrincipal())
                     return AuthenticationResult.Authenticated;
 
                 return AuthenticationResult.Unauthenticated;

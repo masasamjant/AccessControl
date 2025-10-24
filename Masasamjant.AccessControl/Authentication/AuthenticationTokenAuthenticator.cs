@@ -3,18 +3,15 @@
     /// <summary>
     /// Represents authenticator that authenticates tokens.
     /// </summary>
-    public sealed class AuthenticationTokenAuthenticator : IAuthenticationTokenAuthenticator
+    public sealed class AuthenticationTokenAuthenticator : Authenticator, IAuthenticationTokenAuthenticator
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AuthenticationTokenAuthenticator"/> class.
         /// </summary>
         /// <param name="authority">The <see cref="IAccessControlAuthority"/>.</param>
         public AuthenticationTokenAuthenticator(IAccessControlAuthority authority)
-        {
-            Authority = authority;
-        }
-
-        private IAccessControlAuthority Authority { get; }
+            : base(authority)
+        { }
 
         /// <summary>
         /// Authenticates specified <see cref="AuthenticationToken"/>.

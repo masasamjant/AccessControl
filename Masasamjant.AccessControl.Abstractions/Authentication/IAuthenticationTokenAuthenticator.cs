@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents authenticator that authenticates tokens.
     /// </summary>
-    public interface IAuthenticationTokenAuthenticator
+    public interface IAuthenticationTokenAuthenticator : IAuthenticator
     {
         /// <summary>
         /// Authenticates specified <see cref="AuthenticationToken"/>.
