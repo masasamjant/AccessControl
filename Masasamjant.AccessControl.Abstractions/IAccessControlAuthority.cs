@@ -1,6 +1,7 @@
 ﻿using Masasamjant.AccessControl.Authentication;
 using Masasamjant.AccessControl.Authorization;
 using Masasamjant.AccessControl.Authorization.Policies;
+using Microsoft.Extensions.Logging;
 
 namespace Masasamjant.AccessControl
 {
@@ -18,6 +19,11 @@ namespace Masasamjant.AccessControl
         /// Gets the <see cref="IAuthenticationItemValidator"/>.
         /// </summary>
         IAuthenticationItemValidator ItemValidator { get; }
+
+        /// <summary>
+        /// Gets the logger factory.
+        /// </summary>
+        ILoggerFactory LoggerFactory { get; }
 
         /// <summary>
         /// Creates new authentication request authorized by this authority.

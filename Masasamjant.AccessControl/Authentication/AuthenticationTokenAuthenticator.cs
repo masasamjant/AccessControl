@@ -1,4 +1,6 @@
-﻿namespace Masasamjant.AccessControl.Authentication
+﻿using Microsoft.Extensions.Logging;
+
+namespace Masasamjant.AccessControl.Authentication
 {
     /// <summary>
     /// Represents authenticator that authenticates tokens.
@@ -28,20 +30,33 @@
             var token = await Authority.CreateAuthenticationTokenAsync(authenticationToken);
 
             if (!token.IsValid)
+            {
+                WriteLogMessage("Authentication token was not valid.", LogLevel.Information);
                 throw new AuthenticationException("Authentication token is not valid.", token);
+            }
 
             try
             {
                 var validation = Authority.ItemValidator.IsValidToken(token);
 
                 if (!validation.IsValid)
-                    throw new AuthenticationException(string.IsNullOrWhiteSpace(validation.UnvalidReason) ? "Authentication token is not valid." : validation.UnvalidReason, token);
-
+                {
+                    var message = string.IsNullOrWhiteSpace(validation.UnvalidReason) ? "Authentication token is not valid." : validation.UnvalidReason;
+                    WriteLogMessage(message, LogLevel.Information);
+                    throw new AuthenticationException(message, token);
+                }
+                
                 if (!token.Identity.IsAuthenticated)
+                {
+                    WriteLogMessage("Identity is not authenticated.", LogLevel.Information);
                     return new AuthenticationResultResponse(null, Authority);
+                }
 
                 if (!Authority.IsAuthoring(token.Identity))
+                {
+                    WriteLogMessage("Identity is not authored by current authority.", LogLevel.Information);
                     return new AuthenticationResultResponse(null, Authority);
+                }
 
                 var principal = await AccessControlPrincipal.CreateAsync(token.Identity, Authority, token.AuthenticationScheme);
 

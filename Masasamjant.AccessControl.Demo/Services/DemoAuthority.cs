@@ -11,8 +11,8 @@ namespace Masasamjant.AccessControl.Demo.Services
 
         private readonly IAuthenticationSecretProvider secretProvider;
         private readonly IUserService userService;
-        public DemoAuthority(IUserService userService, IAuthenticationSecretProvider secretProvider, IAuthenticationItemValidator itemValidator)
-            : base("Demo", itemValidator)
+        public DemoAuthority(IUserService userService, IAuthenticationSecretProvider secretProvider, IAuthenticationItemValidator itemValidator, ILoggerFactory loggerFactory)
+            : base("Demo", itemValidator, loggerFactory)
         {
             this.userService = userService;
             this.secretProvider = secretProvider;

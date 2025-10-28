@@ -119,9 +119,10 @@ namespace Masasamjant.AccessControl
                 if (!separator.HasValue)
                     throw new InvalidOperationException("Could not resolve separator character for roles.");
 
-                var rolesClaim = separator.Value + string.Join(separator.Value, roleNames);
+                var rolesClaim = roleNames.Length > 0 ? separator.Value + string.Join(separator.Value, roleNames) : string.Empty;
 
-                principal.claims.Add(new AccessControlClaim(AccessControlClaims.Roles, rolesClaim, authority));
+                if (rolesClaim.Length > 0)
+                    principal.claims.Add(new AccessControlClaim(AccessControlClaims.Roles, rolesClaim, authority));
 
                 // Creata authentication token and claim.
                 principal.AuthenticationToken = await authority.CreateAuthenticationTokenAsync(principal, authenticationScheme);

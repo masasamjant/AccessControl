@@ -19,6 +19,7 @@ namespace Masasamjant.AccessControl.Authentication
                 throw new ArgumentException("The identity is not valid.", nameof(identity));
 
             if (string.IsNullOrWhiteSpace(authenticationScheme))
+                throw new ArgumentNullException(nameof(authenticationScheme), "The authentication scheme is empty or only whitespace.");
 
             Identifier = Guid.NewGuid();
             Identity = identity;

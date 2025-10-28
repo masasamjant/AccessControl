@@ -1,6 +1,7 @@
 ﻿using Masasamjant.AccessControl.Authentication;
 using Masasamjant.AccessControl.Authorization;
 using Masasamjant.AccessControl.Authorization.Policies;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace Masasamjant.AccessControl
@@ -15,14 +16,16 @@ namespace Masasamjant.AccessControl
         /// </summary>
         /// <param name="name">The authority name.</param>
         /// <param name="itemValidator">The custom authentication item validator.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
         /// <exception cref="ArgumentNullException">If value of <paramref name="name"/> is empty or only whitespace.</exception>
-        protected AccessControlAuthority(string name, IAuthenticationItemValidator itemValidator)
+        protected AccessControlAuthority(string name, IAuthenticationItemValidator itemValidator, ILoggerFactory loggerFactory)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name), "The authority name is empty or only whitespace.");
 
             Name = name;
             ItemValidator = itemValidator;
+            LoggerFactory = loggerFactory;
         }
 
         /// <summary>
@@ -40,6 +43,11 @@ namespace Masasamjant.AccessControl
         /// Gets the <see cref="IAuthenticationItemValidator"/>.
         /// </summary>
         public IAuthenticationItemValidator ItemValidator { get; }
+
+        /// <summary>
+        /// Gets the logger factory.
+        /// </summary>
+        public ILoggerFactory LoggerFactory { get; }
 
         /// <summary>
         /// Creates new authentication request authorized by this authority.
