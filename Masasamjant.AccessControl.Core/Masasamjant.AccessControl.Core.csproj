@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Masasamjant.AccessControl</RootNamespace>
+    <AssemblyName>Masasamjant.AccessControl.Core</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Masasamjant.Framework" Version="1.6.1" />
+  </ItemGroup>
+
+</Project>

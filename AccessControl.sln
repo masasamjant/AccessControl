@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masasamjant.AccessControl.U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masasamjant.AccessControl.Http", "Masasamjant.AccessControl.Http\Masasamjant.AccessControl.Http.csproj", "{6D054E2D-85F7-4E8D-BDE9-C70C465AE749}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masasamjant.AccessControl.Core", "Masasamjant.AccessControl.Core\Masasamjant.AccessControl.Core.csproj", "{D71EF9B6-A334-4FC3-816B-BF42645878DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{6D054E2D-85F7-4E8D-BDE9-C70C465AE749}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D054E2D-85F7-4E8D-BDE9-C70C465AE749}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D054E2D-85F7-4E8D-BDE9-C70C465AE749}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D71EF9B6-A334-4FC3-816B-BF42645878DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D71EF9B6-A334-4FC3-816B-BF42645878DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D71EF9B6-A334-4FC3-816B-BF42645878DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D71EF9B6-A334-4FC3-816B-BF42645878DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +68,7 @@ Global
 		{DDE68E3C-A528-4056-B5AD-E2F7AC373FC5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{05630FAA-4EF1-4369-9FF6-5BBA2E27E8C5} = {C78685F6-271E-4AB7-A77A-942C890F405D}
 		{6D054E2D-85F7-4E8D-BDE9-C70C465AE749} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{D71EF9B6-A334-4FC3-816B-BF42645878DD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {53BE0653-A55D-4F35-A516-D0A479E6706D}

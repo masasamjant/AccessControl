@@ -13,7 +13,7 @@ namespace Masasamjant.AccessControl
         /// </summary>
         /// <param name="name">The unique name of identity.</param>
         /// <exception cref="ArgumentNullException">If value of <paramref name="name"/> is empty or only whitespace.</exception>
-        public AccessControlIdentity(string name)
+        public AccessControlIdentity(string name, string authority)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name), "The name is empty or only whitespace.");
@@ -38,8 +38,8 @@ namespace Masasamjant.AccessControl
         /// <param name="authenticated"><c>true</c> if represents authenticated identity; <c>false</c> otherwise.</param>
         /// <param name="authenticationScheme">The authentication scheme.</param>
         /// <exception cref="ArgumentNullException">If value of <paramref name="name"/> is empty or only whitespace.</exception>
-        protected internal AccessControlIdentity(string name, bool authenticated, string authenticationScheme)
-            : this(name)
+        public AccessControlIdentity(string name, bool authenticated, string authenticationScheme, string authority)
+            : this(name, authority)
         {
             IsAuthenticated = authenticated;
             AuthenticationType = IsAuthenticated ? authenticationScheme : null;
@@ -62,6 +62,12 @@ namespace Masasamjant.AccessControl
         /// </summary>
         [JsonInclude]
         public string Name { get; internal set; } = string.Empty;
+
+        /// <summary>
+        /// Gets the authority.
+        /// </summary>
+        [JsonInclude]
+        public string Authority { get; internal set; } = string.Empty;
 
         /// <summary>
         /// Gets if or not this identity is valid.

@@ -30,7 +30,7 @@ namespace Masasamjant.AccessControl.Demo.Controllers
         public async Task<IActionResult> IndexAsync([FromForm] LoginViewModel model)
         {
             var identitySecretProvider = new ClientSecretProvider(model.UserName, model.Password, hashProvider);
-            var identity = new AccessControlIdentity(model.UserName);
+            var identity = new AccessControlIdentity(model.UserName, authority.Name);
             var process = new ChallengeAuthenticationProcess(authenticator, identitySecretProvider, hashProvider, DemoAuthority.AuthenticationScheme);
             var request = authority.CreateAuthenticationRequest(identity, DemoAuthority.AuthenticationScheme);
             var response = await process.AuthenticateAsync(identity);

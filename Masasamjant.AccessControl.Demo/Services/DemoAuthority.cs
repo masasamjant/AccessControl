@@ -43,11 +43,6 @@ namespace Masasamjant.AccessControl.Demo.Services
             }
         }
 
-        public override AccessControlIdentity GetAuthenticatedIdentity(AccessControlIdentity identity)
-        {
-            return new DemoAccessControlIdentity(identity, AuthenticationScheme);
-        }
-
         public override bool IsAuthoring(AccessControlIdentity identity)
         {
             var user = userService.GetUser(identity.Name);
@@ -65,16 +60,6 @@ namespace Masasamjant.AccessControl.Demo.Services
         protected override Task<byte[]> GetIdentityAuthenticationSecretAsync(AccessControlIdentity identity, string authenticationScheme)
         {
             return secretProvider.GetAuthenticationSecretAsync(identity, authenticationScheme);
-        }
-
-        private class DemoAccessControlIdentity : AccessControlIdentity
-        {
-            public DemoAccessControlIdentity(AccessControlIdentity identity, string authenticationScheme)
-                : base(identity.Name, true, authenticationScheme)
-            {
-                if (!identity.IsValid)
-                    throw new ArgumentException("The identity is not valid.", nameof(identity));
-            }
         }
     }
 }

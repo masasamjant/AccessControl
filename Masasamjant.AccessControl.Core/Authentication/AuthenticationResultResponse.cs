@@ -11,11 +11,14 @@ namespace Masasamjant.AccessControl.Authentication
         /// Initializes new instance of the <see cref="AuthenticationResultResponse"/> class.
         /// </summary>
         /// <param name="principal">The <see cref="AccessControlPrincipal"/> if authenticated; <c>null</c> otherwise.</param>
-        /// <param name="authority">The <see cref="IAccessControlAuthority"/>.</param>
-        public AuthenticationResultResponse(AccessControlPrincipal? principal, IAccessControlAuthority authority)
+        /// <param name="authority">The name of authority.</param>
+        public AuthenticationResultResponse(AccessControlPrincipal? principal, string authority)
         {
+            if (string.IsNullOrWhiteSpace(authority))
+                throw new ArgumentNullException(nameof(authority), "The authority is empty or only whitespace.");
+
             Principal = principal;
-            Authority = authority.Name;
+            Authority = authority;
             Identifier = Guid.NewGuid();
             Created = DateTimeOffset.UtcNow;
         }

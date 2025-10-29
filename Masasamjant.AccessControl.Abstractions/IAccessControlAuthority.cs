@@ -36,13 +36,6 @@ namespace Masasamjant.AccessControl
         AuthenticationRequest CreateAuthenticationRequest(AccessControlIdentity identity, string authenticationScheme);
 
         /// <summary>
-        /// Gets the <see cref="AccessControlIdentity"/> that represents authenticated identity.
-        /// </summary>
-        /// <param name="identity">The <see cref="AccessControlIdentity"/> that represents unauthenticated identity.</param>
-        /// <returns>A <see cref="AccessControlIdentity"/> that represents authenticated identity.</returns>
-        AccessControlIdentity GetAuthenticatedIdentity(AccessControlIdentity identity);
-
-        /// <summary>
         /// Check if is authoring specified <see cref="IAuthenticationItem"/>.
         /// </summary>
         /// <param name="item">The <see cref="IAuthenticationItem"/>.</param>

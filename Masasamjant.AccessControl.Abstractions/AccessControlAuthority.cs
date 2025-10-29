@@ -61,7 +61,7 @@ namespace Masasamjant.AccessControl
         {
             CheckAuthenticationScheme(authenticationScheme);
 
-            return new AuthenticationRequest(identity, this, authenticationScheme);
+            return new AuthenticationRequest(identity, Name, authenticationScheme);
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Masasamjant.AccessControl
             if (!identity.IsValid || !identity.IsAuthenticated)
                 return string.Empty;
 
-            var authenticationToken = new AuthenticationToken(identity, this, authenticationScheme, principal.Claims, principal.Roles.Select(x => x.FullName));
+            var authenticationToken = new AuthenticationToken(identity, Name, authenticationScheme, principal.Claims, principal.Roles.Select(x => x.FullName));
 
             return await CreateAuthenticationTokenAsync(authenticationToken);
         }
@@ -139,13 +139,6 @@ namespace Masasamjant.AccessControl
 
             return GetIdentityAuthenticationSecretAsync(identity, authenticationScheme);
         }
-
-        /// <summary>
-        /// Gets the <see cref="AccessControlIdentity"/> that represents authenticated identity.
-        /// </summary>
-        /// <param name="identity">The <see cref="AccessControlIdentity"/> that represents unauthenticated identity.</param>
-        /// <returns>A <see cref="AccessControlIdentity"/> that represents authenticated identity.</returns>
-        public abstract AccessControlIdentity GetAuthenticatedIdentity(AccessControlIdentity identity);
 
         /// <summary>
         /// Gets the secret of the specified identity for the specified authentication scheme.

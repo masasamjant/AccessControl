@@ -1,6 +1,5 @@
 ﻿using Masasamjant.Security.Abstractions;
 using Microsoft.Extensions.Logging;
-using System.Net.Security;
 
 namespace Masasamjant.AccessControl.Authentication
 {
@@ -148,7 +147,7 @@ namespace Masasamjant.AccessControl.Authentication
                 if (request == null || string.IsNullOrWhiteSpace(request.Identity.Name))
                 {
                     WriteLogMessage($"No authentication request found for '{challenge.Identifier}' challenge.", LogLevel.Information);
-                    return new AuthenticationResultResponse(null, Authority);
+                    return new AuthenticationResultResponse(null, Authority.Name);
                 }
                 // Gets the authentication secret.
                 var secret = await Authority.GetAuthenticationSecretAsync(request.Identity, request.AuthenticationScheme);
@@ -166,26 +165,26 @@ namespace Masasamjant.AccessControl.Authentication
                         if (challenge.Data[index] != requestChallenge.Data[index])
                         {
                             WriteLogMessage("Challenge data not match. Challenge unauthenticated.", LogLevel.Information);
-                            return new AuthenticationResultResponse(null, Authority);
+                            return new AuthenticationResultResponse(null, Authority.Name);
                         }
                     }
-                    var identity = Authority.GetAuthenticatedIdentity(request.Identity);
+                    var identity = new AccessControlIdentity(request.Identity.Name, true, request.AuthenticationScheme, Authority.Name);
 
                     if (!identity.IsAuthenticated)
                     {
                         WriteLogMessage($"Identity '{identity.Name}' not authenticated.", LogLevel.Information);
-                        return new AuthenticationResultResponse(null, Authority);
+                        return new AuthenticationResultResponse(null, Authority.Name);
                     }
 
-                    var principal = await AccessControlPrincipal.CreateAsync(identity, Authority, request.AuthenticationScheme);
+                    var principal = await AccessControlPrincipalFactory.CreateAsync(identity, Authority, request.AuthenticationScheme);
 
                     WriteLogMessage($"Challenge '{challenge.Identifier}' authenticated.", LogLevel.Information);
 
-                    return new AuthenticationResultResponse(principal, Authority);
+                    return new AuthenticationResultResponse(principal, Authority.Name);
                 }
 
                 // Challenges not with same data return unauthenticated response.
-                return new AuthenticationResultResponse(null, Authority);
+                return new AuthenticationResultResponse(null, Authority.Name);
             }
             catch (Exception exception)
             {

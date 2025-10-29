@@ -14,14 +14,14 @@ namespace Masasamjant.AccessControl
         /// <param name="value">The claim value.</param>
         /// <param name="authority">The <see cref="IAccessControlAuthority"/> who author this claim.</param>
         /// <exception cref="ArgumentException">If value of <paramref name="key"/> is empty or only whitespace.</exception>
-        public AccessControlClaim(string key, string value, IAccessControlAuthority authority)
+        public AccessControlClaim(string key, string value, string authority)
         {
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentException("The key is empty or only whitespace.", nameof(key));
 
             Key = key;
             Value = value;
-            Authority = authority.Name;
+            Authority = authority;
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Masasamjant.AccessControl
         public string Value { get; internal set; } = string.Empty;
 
         /// <summary>
-        /// Gets the name of <see cref="IAccessControlAuthority"/> who author this key.
+        /// Gets the authority of this claim.
         /// </summary>
         [JsonInclude]
         public string Authority { get; internal set; } = string.Empty;

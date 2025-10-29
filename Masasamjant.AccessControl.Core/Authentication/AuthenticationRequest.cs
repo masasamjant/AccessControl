@@ -13,15 +13,21 @@ namespace Masasamjant.AccessControl.Authentication
         /// <summary>
         /// Initializes new instance of the <see cref="AuthenticationRequest"/> class.
         /// </summary>
-        /// <param name="authority">The <see cref="IAccessControlAuthority"/>.</param>
+        /// <param name="authority">The name of authority.</param>
         /// <param name="authenticationScheme">The authentication scheme.</param>
-        /// <exception cref="ArgumentNullException">If value of <paramref name="authenticationScheme"/> is empty or only whitespace.</exception>
-        public AuthenticationRequest(AccessControlIdentity identity, IAccessControlAuthority authority, string authenticationScheme)
+        /// <exception cref="ArgumentNullException">If value of <paramref name="authority"/> or <paramref name="authenticationScheme"/> is empty or only whitespace.</exception>
+        public AuthenticationRequest(AccessControlIdentity identity, string authority, string authenticationScheme)
         {
+            if (string.IsNullOrWhiteSpace(authority))
+                throw new ArgumentNullException(nameof(authority), "The authority is empty or only whitespace.");
+
+            if (string.IsNullOrWhiteSpace(authenticationScheme))
+                throw new ArgumentNullException(nameof(authenticationScheme), "The authentication scheme is empty or only whitespace.");
+
             Identifier = Guid.NewGuid();
             Identity = identity;
             Created = DateTimeOffset.UtcNow;
-            Authority = authority.Name;
+            Authority = authority;
             AuthenticationScheme = authenticationScheme;
         }
 

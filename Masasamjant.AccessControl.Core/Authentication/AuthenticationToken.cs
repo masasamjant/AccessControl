@@ -13,7 +13,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="identity">The identity value.</param>
         /// <param name="authority">The authority name.</param>
         /// <param name="claims">The claims to associate with token.</param>
-        public AuthenticationToken(AccessControlIdentity identity, IAccessControlAuthority authority, string authenticationScheme, IEnumerable<AccessControlClaim> claims, IEnumerable<string> roles)
+        public AuthenticationToken(AccessControlIdentity identity, string authority, string authenticationScheme, IEnumerable<AccessControlClaim> claims, IEnumerable<string> roles)
         {
             if (!identity.IsValid)
                 throw new ArgumentException("The identity is not valid.", nameof(identity));
@@ -21,12 +21,15 @@ namespace Masasamjant.AccessControl.Authentication
             if (string.IsNullOrWhiteSpace(authenticationScheme))
                 throw new ArgumentNullException(nameof(authenticationScheme), "The authentication scheme is empty or only whitespace.");
 
+            if (string.IsNullOrWhiteSpace(authority))
+                throw new ArgumentNullException(nameof(authority), "The authority is empty or only whitespace.");
+
             Identifier = Guid.NewGuid();
             Identity = identity;
             Created = DateTimeOffset.UtcNow;
             Claims = claims.ToArray();
             Roles = roles.ToArray();
-            Authority = authority.Name;
+            Authority = authority;
             AuthenticationScheme = authenticationScheme;
         }
 

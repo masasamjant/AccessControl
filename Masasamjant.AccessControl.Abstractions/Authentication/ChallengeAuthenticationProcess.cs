@@ -44,14 +44,14 @@ namespace Masasamjant.AccessControl.Authentication
             var requestResponse = await authenticator.RequestAuthenticationAsync(request);
 
             if (!requestResponse.IsValid)
-                return new AuthenticationResultResponse(null, authority);
+                return new AuthenticationResultResponse(null, authority.Name);
 
             var identitySecret = await identitySecretProvider.GetAuthenticationSecretAsync(identity, authenticationScheme);
             var challenge = requestResponse.Request.CreateAuthenticationChallenge(identitySecret, hashProvider);
             var resultResponse = await authenticator.AuthenticateChallengeAsync(challenge);
 
             if (!resultResponse.IsValid)
-                return new AuthenticationResultResponse(null, authority);
+                return new AuthenticationResultResponse(null, authority.Name);
 
             return resultResponse;
         }

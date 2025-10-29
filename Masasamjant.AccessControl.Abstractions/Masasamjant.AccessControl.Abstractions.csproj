@@ -23,8 +23,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Masasamjant.Framework" Version="1.6.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Masasamjant.AccessControl.Core\Masasamjant.AccessControl.Core.csproj" />
   </ItemGroup>
   
   <ItemGroup>

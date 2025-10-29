@@ -49,18 +49,18 @@ namespace Masasamjant.AccessControl.Authentication
                 if (!token.Identity.IsAuthenticated)
                 {
                     WriteLogMessage("Identity is not authenticated.", LogLevel.Information);
-                    return new AuthenticationResultResponse(null, Authority);
+                    return new AuthenticationResultResponse(null, Authority.Name);
                 }
 
                 if (!Authority.IsAuthoring(token.Identity))
                 {
                     WriteLogMessage("Identity is not authored by current authority.", LogLevel.Information);
-                    return new AuthenticationResultResponse(null, Authority);
+                    return new AuthenticationResultResponse(null, Authority.Name);
                 }
 
-                var principal = await AccessControlPrincipal.CreateAsync(token.Identity, Authority, token.AuthenticationScheme);
+                var principal = await AccessControlPrincipalFactory.CreateAsync(token.Identity, Authority, token.AuthenticationScheme);
 
-                return new AuthenticationResultResponse(principal, Authority);
+                return new AuthenticationResultResponse(principal, Authority.Name);
             }
             catch (Exception exception)
             {
