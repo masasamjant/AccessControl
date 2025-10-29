@@ -4,6 +4,9 @@ using System.Security.Claims;
 
 namespace Masasamjant.AccessControl
 {
+    /// <summary>
+    /// Factory class to create <see cref="AccessControlPrincipal"/> instances.
+    /// </summary>
     public static class AccessControlPrincipalFactory
     {
         /// <summary>
