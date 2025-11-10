@@ -14,11 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Masasamjant.AccessControl.Abstractions\Masasamjant.AccessControl.Abstractions.csproj" />
-    <ProjectReference Include="..\Masasamjant.AccessControl\Masasamjant.AccessControl.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
