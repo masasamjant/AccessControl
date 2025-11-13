@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Masasamjant.AccessControl.Core</AssemblyName>
+    <RootNamespace>Masasamjant.AccessControl</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Masasamjant.Framework" Version="1.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Masasamjant.AccessControl.Abstractions\Masasamjant.AccessControl.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
