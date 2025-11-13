@@ -69,8 +69,9 @@ namespace Masasamjant.AccessControl.Authentication
         public async Task<AuthenticationChallenge> CreateAuthenticationChallengeAsync(IUserSecretProvider secretProvider, IHashProvider hashProvider)
         {
             var userSecret = await secretProvider.GetUserSecretAsync(Identity.Name, SecretType);
-            var userSecretData = userSecret?.Data ?? throw new InvalidOperationException($"User '{Identity.Name}' do not have '{SecretType}' secret.");
-            return CreateAuthenticationChallenge(userSecretData, hashProvider);
+            if (userSecret == null)
+                throw new InvalidOperationException($"User '{Identity.Name}' do not have '{SecretType}' secret.");
+            return CreateAuthenticationChallenge(userSecret, hashProvider);
         }
 
         /// <summary>
@@ -85,9 +86,10 @@ namespace Masasamjant.AccessControl.Authentication
             return hashProvider.HashData(data);
         }
 
-        internal AuthenticationChallenge CreateAuthenticationChallenge(byte[] identitySecret, IHashProvider hashProvider)
+        public AuthenticationChallenge CreateAuthenticationChallenge(IUserSecret userSecret, IHashProvider hashProvider)
         {
-            return new AuthenticationChallenge(this, identitySecret, hashProvider);
+            var userSecretData = userSecret?.Data ?? throw new InvalidOperationException($"User '{Identity.Name}' do not have '{SecretType}' secret.");
+            return new AuthenticationChallenge(this, userSecretData, hashProvider);
         }
     }
 }

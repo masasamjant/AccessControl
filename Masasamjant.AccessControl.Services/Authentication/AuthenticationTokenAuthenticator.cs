@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Masasamjant.AccessControl.Authentication
 {
-    public class AuthenticationTokenAuthenticator
+    public sealed class AuthenticationTokenAuthenticator : IAuthenticationTokenAuthenticator
     {
         private readonly Authority authority;
         private readonly IAuthenticationTokenBuilder tokenBuilder;
