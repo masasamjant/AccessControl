@@ -33,13 +33,13 @@ namespace Masasamjant.AccessControl
         /// Gets the name.
         /// </summary>
         [JsonInclude]
-        public string Name { get; internal set; } = "LOCAL AUTHORITY";
+        public string Name { get; internal set; } = AccessControlValues.LocalAuthorityName;
 
         /// <summary>
         /// Get the URI to identify authority.
         /// </summary>
         [JsonInclude]
-        public Uri Uri { get; internal set; } = new Uri("/localhost", UriKind.Relative);
+        public Uri Uri { get; internal set; } = AccessControlValues.LocalAuthorityUri;
 
         /// <summary>
         /// Check if is authoring specified <see cref="IAuthored"/> item.
@@ -60,6 +60,11 @@ namespace Masasamjant.AccessControl
             return new AuthenticationRequest(identity, secretType);
         }
 
+        /// <summary>
+        /// Check if other authority is equal to this instance.
+        /// </summary>
+        /// <param name="other">The other authority.</param>
+        /// <returns><c>true</c> if this and other authority has same URI and name; <c>false</c> otherwise.</returns>
         public bool Equals(Authority? other)
         {
             return other != null &&
@@ -67,16 +72,29 @@ namespace Masasamjant.AccessControl
                 string.Equals(Name, other.Name, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Check if object instance is authority and equal to this instance.
+        /// </summary>
+        /// <param name="obj">The object instance.</param>
+        /// <returns><c>true</c> if <paramref name="obj"/> is authority and equal to this; <c>false</c> otherwise.</returns>
         public override bool Equals(object? obj)
         {
             return Equals(obj as Authority);
         }
 
+        /// <summary>
+        /// Gets hash code.
+        /// </summary>
+        /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
             return HashCode.Combine(Uri, Name);
         }
 
+        /// <summary>
+        /// Gets the string representation of this authority.
+        /// </summary>
+        /// <returns>A <see cref="Name"/>.</returns>
         public override string ToString()
         {
             return Name;
