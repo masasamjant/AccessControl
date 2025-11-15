@@ -6,7 +6,7 @@ namespace Masasamjant.AccessControl
     /// <summary>
     /// Represents a claim that has been authored by a specific authority.
     /// </summary>
-    public class AuthoredClaim : IAuthored, IEquatable<AuthoredClaim>
+    public sealed class AuthoredClaim : IAuthored, IEquatable<AuthoredClaim>
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AuthoredClaim"/> class.

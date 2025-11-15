@@ -6,7 +6,7 @@ namespace Masasamjant.AccessControl
     /// <summary>
     /// Represents access control authority.
     /// </summary>
-    public class Authority : IEquatable<Authority>
+    public sealed class Authority : IEquatable<Authority>
     {
         /// <summary>
         /// Initializes new instance of the <see cref="Authority"/> class.
@@ -98,6 +98,11 @@ namespace Masasamjant.AccessControl
         public override string ToString()
         {
             return Name;
+        }
+
+        public string GetIssuerString()
+        {
+            return $"{Name} ({Uri})";
         }
     }
 }

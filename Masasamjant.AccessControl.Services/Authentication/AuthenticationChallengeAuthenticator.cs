@@ -1,9 +1,4 @@
 ﻿using Masasamjant.Security.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Masasamjant.AccessControl.Authentication
 {
@@ -16,6 +11,7 @@ namespace Masasamjant.AccessControl.Authentication
         private readonly IHashProvider hashProvider;
         private readonly IAuthenticationRequestRepository requestRepository;
         private readonly IUserProvider userProvider;
+        private readonly AuthenticationTokenBuilder tokenBuilder;
 
         /// <summary>
         /// Initializes new instance of <see cref="AuthenticationChallengeAuthenticator"/> class.
@@ -24,12 +20,13 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="hashProvider">The hash provider.</param>
         /// <param name="requestRepository">The repository to store authentication request.</param>
         /// <param name="userProvider">The user provider.</param>
-        public AuthenticationChallengeAuthenticator(Authority authority, IHashProvider hashProvider, IAuthenticationRequestRepository requestRepository, IUserProvider userProvider)
+        public AuthenticationChallengeAuthenticator(Authority authority, IHashProvider hashProvider, IAuthenticationRequestRepository requestRepository, IUserProvider userProvider, AuthenticationTokenBuilder tokenBuilder)
         {
             this.authority = authority;
             this.hashProvider = hashProvider;
             this.requestRepository = requestRepository;
             this.userProvider = userProvider;
+            this.tokenBuilder = tokenBuilder;
         }
 
         /// <summary>
@@ -38,7 +35,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="request">The authentication request.</param>
         /// <returns>A <see cref="AuthenticationRequestResponse"/>.</returns>
         /// <exception cref="ArgumentException">If authority associated with authenticator is not authoring <paramref name="request"/>.</exception>
-        /// <exception cref="InvalidOperationException">If requesting authentication using <paramref name="request"/> fails.</exception>
+        /// <exception cref="AuthenticationException">If requesting authentication using <paramref name="request"/> fails.</exception>
         public async Task<AuthenticationRequestResponse> RequestAuthenticationAsync(AuthenticationRequest request)
         {
             if (!authority.IsAuthoring(request))
@@ -51,7 +48,7 @@ namespace Masasamjant.AccessControl.Authentication
             }
             catch (Exception exception)
             {
-                throw new InvalidOperationException($"Saving authentication request '{request.Identifier}' failed. See inner exception.", exception);
+                throw new AuthenticationException($"Saving authentication request '{request.Identifier}' failed. See inner exception.", exception);
             }
         }
 
@@ -62,7 +59,7 @@ namespace Masasamjant.AccessControl.Authentication
         /// <param name="challenge">The authentication challenge to authenticate.</param>
         /// <returns>A <see cref="AuthenticationResultResponse"/>.</returns>
         /// <exception cref="ArgumentException">If authority associate with authenticator is not authoring <paramref name="challenge"/>.</exception>
-        /// <exception cref="InvalidOperationException">If authenticating <paramref name="challenge"/> fails.</exception>
+        /// <exception cref="AuthenticationException">If authenticating <paramref name="challenge"/> fails.</exception>
         public async Task<AuthenticationResultResponse> AuthenticateChallengeAsync(AuthenticationChallenge challenge)
         {
             if (!authority.IsAuthoring(challenge))
@@ -108,9 +105,11 @@ namespace Masasamjant.AccessControl.Authentication
                     // Challenges has equal data. Create identity and principal
                     var identity = new AuthoredIdentity(request.Authority, request.Identity.Name, user);
                     var principal = new AuthoredPrincipal(identity);
+                    var authenticationToken = new AuthenticationToken(identity);
+                    var token = await tokenBuilder.BuildAuthenticationTokenAsync(authenticationToken);
 
                     // Return authenticated response.
-                    return new AuthenticationResultResponse(principal);
+                    return new AuthenticationResultResponse(principal, token);
                 }
 
                 // Challenges data length differ, return unauthenticated response.
@@ -119,7 +118,7 @@ namespace Masasamjant.AccessControl.Authentication
             }
             catch (Exception exception)
             {
-                throw new InvalidOperationException($"Authenticating challenge for request '{challenge.RequestIdentifier}' failed. See inner exception.", exception);
+                throw new AuthenticationException($"Authenticating challenge for request '{challenge.RequestIdentifier}' failed. See inner exception.", exception);
             }
         }
     }

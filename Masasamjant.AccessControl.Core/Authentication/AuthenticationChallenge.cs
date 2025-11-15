@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl.Authentication
     /// <summary>
     /// Represents authentication challenge.
     /// </summary>
-    public class AuthenticationChallenge : IAuthored
+    public sealed class AuthenticationChallenge : IAuthored
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AuthenticationChallenge"/> class for specified <see cref="AuthenticationRequest"/>.

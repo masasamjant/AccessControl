@@ -6,7 +6,7 @@ namespace Masasamjant.AccessControl
     /// <summary>
     /// Represents authored <see cref="ClaimsPrincipal"/>.
     /// </summary>
-    public class AuthoredPrincipal : ClaimsPrincipal, IAuthored
+    public sealed class AuthoredPrincipal : ClaimsPrincipal, IAuthored
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AuthoredPrincipal"/> class with specified <see cref="AuthoredIdentity"/>.

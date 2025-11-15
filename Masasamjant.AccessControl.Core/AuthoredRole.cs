@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl
     /// <summary>
     /// Represents authored role.
     /// </summary>
-    public class AuthoredRole : IAuthored
+    public sealed class AuthoredRole : IAuthored
     {
         /// <summary>
         /// Initializes new instance of the <see cref="AuthoredRole"/> with specified authority and name.

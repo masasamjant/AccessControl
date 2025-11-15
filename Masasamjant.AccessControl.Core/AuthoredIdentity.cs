@@ -7,7 +7,7 @@ namespace Masasamjant.AccessControl
     /// <summary>
     /// Represents authored <see cref="ClaimsIdentity"/>.
     /// </summary>
-    public class AuthoredIdentity : ClaimsIdentity, IAuthored, IIdentity
+    public sealed class AuthoredIdentity : ClaimsIdentity, IAuthored, IIdentity
     {
         private List<AuthoredClaim> claims = new List<AuthoredClaim>();
         private List<AuthoredRole>? roles;
@@ -51,7 +51,7 @@ namespace Masasamjant.AccessControl
             }
             else
             {
-                AddAuthoredClaim(ClaimTypes.Authentication, bool.FalseString.ToLowerInvariant(), ClaimValueTypes.Boolean);
+                AddAuthoredClaim(ClaimTypes.Authentication, bool.FalseString.ToLowerInvariant(), ClaimValueTypes.String);
             }
         }
 
@@ -59,7 +59,63 @@ namespace Masasamjant.AccessControl
         /// Initializes new default instance of the <see cref="AuthoredIdentity"/> class.
         /// </summary>
         public AuthoredIdentity()
+            : base()
         { }
+
+        internal AuthoredIdentity(IEnumerable<Claim> claims)
+        {
+            if (!claims.Any())
+                return;
+
+            var systemClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.System);
+
+            if (systemClaim == null)
+                throw new ArgumentException($"The claims is missing mandatory '{ClaimTypes.System}' claim.", nameof(claims));
+
+            var authority = GetAuthority(systemClaim);
+
+            if (authority == null)
+                throw new ArgumentException($"The '{ClaimTypes.System}' claim does not represent valid authority.", nameof(claims));
+
+        
+            var nameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+
+            if (nameClaim == null)
+                throw new ArgumentException($"The claims is missing mandatory '{ClaimTypes.Name}' claim.", nameof(claims));
+
+            if (nameClaim != null)
+                AddAuthoredClaim(ClaimTypes.Name, nameClaim.Value, nameClaim.ValueType);
+
+            AddAuthoredClaim(ClaimTypes.System, string.Join(AccessControlValues.ItemSeparator, authority.Uri, authority.Name), ClaimValueTypes.String);
+
+            var authenticationClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Authentication);
+
+            if (authenticationClaim == null || authenticationClaim.Value != bool.TrueString.ToLowerInvariant())
+            {
+                AddAuthoredClaim(ClaimTypes.Authentication, bool.FalseString.ToLowerInvariant(), ClaimValueTypes.String);
+            }
+            else
+            {
+                AddAuthoredClaim(ClaimTypes.Authentication, bool.TrueString.ToLowerInvariant(), ClaimValueTypes.String);
+                AddAuthoredClaim(ClaimTypes.AuthenticationInstant, authority.Uri.ToString(), ClaimValueTypes.String);
+
+                var roleClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+                if (roleClaim != null)
+                    AddAuthoredClaim(ClaimTypes.Role, roleClaim.Value, roleClaim.ValueType);
+
+                var identifierClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                if (identifierClaim != null)
+                    AddAuthoredClaim(ClaimTypes.NameIdentifier, identifierClaim.Value, identifierClaim.ValueType);
+
+                var emailClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                if (emailClaim != null)
+                    AddAuthoredClaim(ClaimTypes.Email, emailClaim.Value, emailClaim.ValueType);
+            
+                var mobilePhoneClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.MobilePhone);
+                if (mobilePhoneClaim != null)
+                    AddAuthoredClaim(ClaimTypes.MobilePhone, mobilePhoneClaim.Value, mobilePhoneClaim.ValueType);
+            }
+        }
 
         private AuthoredIdentity(IEnumerable<AuthoredClaim> claims)
         {
@@ -221,6 +277,22 @@ namespace Masasamjant.AccessControl
                 return new Authority();
 
             var parts = claim.ClaimValue.Split(AccessControlValues.ItemSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]) || string.IsNullOrWhiteSpace(parts[1]))
+                return new Authority();
+
+            if (Uri.TryCreate(parts[0], UriKind.RelativeOrAbsolute, out var uri))
+                return new Authority(uri, parts[1]);
+
+            return new Authority();
+        }
+
+        private static Authority? GetAuthority(Claim systemClaim)
+        {
+            if (string.IsNullOrWhiteSpace(systemClaim.Value))
+                return new Authority();
+
+            var parts = systemClaim.Value.Split(AccessControlValues.ItemSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
             if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]) || string.IsNullOrWhiteSpace(parts[1]))
                 return new Authority();

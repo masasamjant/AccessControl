@@ -7,8 +7,14 @@ namespace Masasamjant.AccessControl.Authentication
     /// <summary>
     /// Represents request to authenticate <see cref="AuthoredIdentity"/>.
     /// </summary>
-    public class AuthenticationRequest : IAuthored
+    public sealed class AuthenticationRequest : IAuthored
     {
+        /// <summary>
+        /// Initializes new instance of the <see cref="AuthenticationRequest"/> class.
+        /// </summary>
+        /// <param name="identity">The identity to authenticate.</param>
+        /// <param name="secretType">The type of user secret use in authentication.</param>
+        /// <exception cref="ArgumentException">If value of <paramref name="secretType"/> is not defined.</exception>
         public AuthenticationRequest(AuthoredIdentity identity, UserSecretType secretType)
         {
             if (!Enum.IsDefined(secretType))
@@ -62,16 +68,16 @@ namespace Masasamjant.AccessControl.Authentication
         /// <summary>
         /// Creates new <see cref="AuthenticationChallenge"/> for this request.
         /// </summary>
-        /// <param name="secretProvider">The <see cref="IUserSecretProvider"/>.</param>
-        /// <param name="hashProvider">The <see cref="IHashProvider"/>.</param>
-        /// <returns>A <see cref="AuthenticationChallenge"/>.</returns>
-        /// <exception cref="InvalidOperationException">If user does not have <see cref="SecretType"/> secret.</exception>
-        public async Task<AuthenticationChallenge> CreateAuthenticationChallengeAsync(IUserSecretProvider secretProvider, IHashProvider hashProvider)
+        /// <param name="userSecret">The user secret.</param>
+        /// <param name="hashProvider">The hash provider.</param>
+        /// <returns>A authentication challenge.</returns>
+        /// <exception cref="ArgumentException">If data of <paramref name="userSecret"/> is empty.</exception>
+        public AuthenticationChallenge CreateAuthenticationChallenge(IUserSecret userSecret, IHashProvider hashProvider)
         {
-            var userSecret = await secretProvider.GetUserSecretAsync(Identity.Name, SecretType);
-            if (userSecret == null)
-                throw new InvalidOperationException($"User '{Identity.Name}' do not have '{SecretType}' secret.");
-            return CreateAuthenticationChallenge(userSecret, hashProvider);
+            if (userSecret.Data.Length == 0)
+                throw new ArgumentException("The user secret data is empty.", nameof(userSecret));
+
+            return new AuthenticationChallenge(this, userSecret.Data, hashProvider);
         }
 
         /// <summary>
@@ -84,12 +90,6 @@ namespace Masasamjant.AccessControl.Authentication
             var value = string.Concat(Identifier, Identity.Name, Created.ToString(CultureInfo.InvariantCulture), Authority.Name, Authority.Uri);
             var data = value.GetByteArray();
             return hashProvider.HashData(data);
-        }
-
-        public AuthenticationChallenge CreateAuthenticationChallenge(IUserSecret userSecret, IHashProvider hashProvider)
-        {
-            var userSecretData = userSecret?.Data ?? throw new InvalidOperationException($"User '{Identity.Name}' do not have '{SecretType}' secret.");
-            return new AuthenticationChallenge(this, userSecretData, hashProvider);
         }
     }
 }

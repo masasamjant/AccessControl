@@ -5,7 +5,7 @@ namespace Masasamjant.AccessControl.Authentication
     /// <summary>
     /// Represents response to authentication request.
     /// </summary>
-    public class AuthenticationRequestResponse : AuthenticationResponse
+    public sealed class AuthenticationRequestResponse : AuthenticationResponse
     {
         /// <summary>
         /// Initializes new default instance of the <see cref="AuthenticationRequestResponse"/> class with specified authentication request.
