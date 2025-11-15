@@ -29,15 +29,15 @@ namespace Masasamjant.AccessControl
             };
 
             if (properties.IsSigned)
-            { 
-                var signKey = Encoding.UTF8.GetBytes(properties.SignKey);
+            {
+                var signKey = properties.SignKey.GetByteArray(properties.KeyEncoding);
                 var symmetricKey = new SymmetricSecurityKey(signKey);
                 validationParameters.IssuerSigningKey = symmetricKey;
             }
         
             if (properties.IsEncrypted)
             {
-                var encKey = Encoding.UTF8.GetBytes(properties.EncryptKey);
+                var encKey = properties.EncryptKey.GetByteArray(properties.KeyEncoding);
                 var encSymmetricKey = new SymmetricSecurityKey(encKey);
                 validationParameters.TokenDecryptionKey = encSymmetricKey;
             };

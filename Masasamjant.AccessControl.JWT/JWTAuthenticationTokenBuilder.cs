@@ -36,14 +36,14 @@ namespace Masasamjant.AccessControl
 
                 if (properties.IsSigned)
                 {
-                    var signKey = Encoding.UTF8.GetBytes(properties.SignKey);
+                    var signKey = properties.SignKey.GetByteArray(properties.KeyEncoding);
                     var symmetricKey = new SymmetricSecurityKey(signKey);
                     signingCredentials = new SigningCredentials(symmetricKey, properties.SignAlgorithm.ToAlgorithmString());
                 }
 
                 if (properties.IsEncrypted)
                 {
-                    var encKey = Encoding.UTF8.GetBytes(properties.EncryptKey);
+                    var encKey = properties.EncryptKey.GetByteArray(properties.KeyEncoding);
                     var encSymmetricKey = new SymmetricSecurityKey(encKey);
                     var encCredentials = new EncryptingCredentials(encSymmetricKey, properties.EncryptKeyWrapAlgorithm.ToAlgorithmString(), properties.EncryptAlgorithm.ToAlgorithmString());
                     securityToken = handler.CreateJwtSecurityToken(issuer, audience, token.Identity, now, now.AddMinutes(properties.TokenExpiryInMinutes), now, signingCredentials, encCredentials);

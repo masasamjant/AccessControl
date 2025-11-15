@@ -1,4 +1,6 @@
-﻿namespace Masasamjant.AccessControl
+﻿using System.Text;
+
+namespace Masasamjant.AccessControl
 {
     /// <summary>
     /// Properties for JWT token generation and validation. 
@@ -101,6 +103,11 @@
                     && EncryptAlgorithm != JwtSecurityAlgorithm.None;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the encoding used for keys.
+        /// </summary>
+        public Encoding KeyEncoding { get; set; } = Encoding.UTF8;
 
         /// <summary>
         /// Gets or sets the audience. If empty string or only whitespace, the authority name is used as audience.
